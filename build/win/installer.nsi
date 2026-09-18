@@ -8,6 +8,7 @@
 Unicode true
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
+!include "LogicLib.nsh"
 
 !ifndef VERSION
   !define VERSION "0.0.0"
@@ -23,6 +24,8 @@ Unicode true
 !define BUNDLEID   "com.eddie.drop"
 !define PUBLISHER  "Eddie"
 !define UNINSTKEY  "Software\Microsoft\Windows\CurrentVersion\Uninstall\EddieDrop"
+
+Var UninstDir
 
 Name "${APPNAME} ${VERSION}"
 OutFile "${OUTFILE}"
@@ -48,7 +51,8 @@ VIAddVersionKey /LANG=1042 "LegalCopyright"  "${PUBLISHER}"
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_DIRECTORY
+; 설치 폴더 선택 페이지는 두지 않는다.
+; 경로를 바꾸면 프리미어가 확장을 못 찾기 때문이다.
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 
@@ -66,15 +70,21 @@ Section "설치" SecMain
   SetOutPath "$INSTDIR"
   File /r "${PAYLOAD}\*.*"
 
-  WriteUninstaller "$INSTDIR\uninstall.exe"
+  ; ⚠️ 제거 프로그램을 확장 폴더 "안"에 두면 안 된다.
+  ;    CEP 는 서명할 때 없던 파일이 폴더에 있으면 서명이 깨진 것으로 보고
+  ;    확장을 아예 불러오지 않는다 → 창 > 확장명 에 패널이 안 뜬다.
+  ;    (1.0.2 까지 이 문제로 윈도우에서 패널이 안 떴다)
+  StrCpy $UninstDir "$APPDATA\Eddie\uninstaller"
+  CreateDirectory "$UninstDir"
+  WriteUninstaller "$UninstDir\EddieDrop-uninstall.exe"
 
   ; 제어판 "프로그램 제거" 등록 (현재 사용자)
   WriteRegStr   HKCU "${UNINSTKEY}" "DisplayName"     "${APPNAME}"
   WriteRegStr   HKCU "${UNINSTKEY}" "DisplayVersion"  "${VERSION}"
   WriteRegStr   HKCU "${UNINSTKEY}" "Publisher"       "${PUBLISHER}"
   WriteRegStr   HKCU "${UNINSTKEY}" "InstallLocation" "$INSTDIR"
-  WriteRegStr   HKCU "${UNINSTKEY}" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegStr   HKCU "${UNINSTKEY}" "DisplayIcon"     "$INSTDIR\uninstall.exe"
+  WriteRegStr   HKCU "${UNINSTKEY}" "UninstallString" '"$UninstDir\EddieDrop-uninstall.exe"'
+  WriteRegStr   HKCU "${UNINSTKEY}" "DisplayIcon"     "$UninstDir\EddieDrop-uninstall.exe"
   WriteRegDWORD HKCU "${UNINSTKEY}" "NoModify" 1
   WriteRegDWORD HKCU "${UNINSTKEY}" "NoRepair" 1
 
@@ -87,8 +97,18 @@ SectionEnd
 
 ; ---------------- 제거 ----------------
 Section "Uninstall"
-  RMDir /r "$INSTDIR"
+  ; 확장이 어디 깔렸는지 레지스트리에서 읽는다
+  ReadRegStr $0 HKCU "${UNINSTKEY}" "InstallLocation"
+  ${If} $0 == ""
+    StrCpy $0 "$APPDATA\Adobe\CEP\extensions\${BUNDLEID}"
+  ${EndIf}
+  RMDir /r "$0"
+
   DeleteRegKey HKCU "${UNINSTKEY}"
+
+  ; 제거 프로그램 자신이 있는 폴더도 정리한다
+  Delete "$INSTDIR\EddieDrop-uninstall.exe"
+  RMDir "$INSTDIR"
 
   ; 참고: 공용 설정 폴더(%APPDATA%\Eddie)와 받아둔 파일은 일부러 지우지 않습니다.
   ;       다른 에디 플러그인이 같이 쓰고, 사용자가 받아둔 소스가 들어 있기 때문입니다.
