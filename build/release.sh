@@ -164,7 +164,13 @@ cat version.json | sed 's/^/   /'
 # 5. 깃허브에 올리기
 # ------------------------------------------------------------------
 if [ "$DRY" = "1" ]; then
-  warn "--dry-run 이라 여기서 멈춥니다. (깃허브에 올리지 않았습니다)"
+  # 연습이므로 고쳐놓은 버전 번호를 되돌린다.
+  # (안 되돌리면 진짜로 배포할 때 "이미 그 버전" 이라며 막힌다)
+  git checkout -- CSXS/manifest.xml plugin/plugin.json 2>/dev/null || true
+  rm -f version.json
+  warn "--dry-run 이라 여기서 멈춥니다."
+  echo "   깃허브에 아무것도 올리지 않았고, 버전 번호도 v$CUR 그대로 되돌렸습니다."
+  echo "   만들어본 파일: $(basename "$ZIP")"
   exit 0
 fi
 
