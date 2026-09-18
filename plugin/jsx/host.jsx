@@ -137,6 +137,27 @@ EddieDrop.util = {
         });
     },
 
+    /**
+     * 같은 파일을 가리키는 항목을 전부 찾는다.
+     * 끌어놓기로 넣으면 미리 불러둔 것과 별도로 하나 더 생길 수 있어서,
+     * 하나만 찾는 findByMediaPath 로는 부족하다.
+     * → [{ item, parent }]
+     */
+    findAllByMediaPath: function (target) {
+        var out = [];
+        function walk(root) {
+            for (var i = 0; i < root.children.numItems; i++) {
+                var it = root.children[i];
+                if (EddieDrop.util.isBin(it)) { walk(it); continue; }
+                var mp = '';
+                try { mp = it.getMediaPath(); } catch (e) { continue; }
+                if (mp && EddieDrop.util.samePath(mp, target)) out.push({ item: it, parent: root });
+            }
+        }
+        walk(app.project.rootItem);
+        return out;
+    },
+
     findByNodeId: function (nodeId) {
         if (!nodeId) return null;
         return EddieDrop.util.walkItems(app.project.rootItem, function (it) {
@@ -412,6 +433,35 @@ EddieDrop.core = {
      * → 같은 파일을 쓰는 오디오 클립 중 "볼륨을 아직 안 건드린 것" 만 손본다.
      * args: { path, levelDb }
      */
+    /**
+     * 끌어놓기로 프로젝트에 들어온 항목을 Eddie Drop 빈으로 옮긴다.
+     *
+     * 끌어놓기는 프리미어가 직접 처리해서 패널이 빈을 정할 수 없다.
+     * 그래서 들어온 뒤에 찾아서 옮긴다.
+     *
+     * args: { path, bin: ["Eddie Drop", "Pexels"] }
+     * → { count, moved, already }
+     */
+    organizeByPath: function (argStr) {
+        var a = EddieDrop.parse(argStr);
+        if (!a.path) throw new Error('파일 경로가 없습니다.');
+
+        var found = EddieDrop.util.findAllByMediaPath(a.path);
+        if (!found.length) return EddieDrop.ok({ count: 0, moved: 0, already: 0 });
+
+        var target = EddieDrop.util.ensureBin(a.bin || ['Eddie Drop']);
+        var moved = 0, already = 0;
+
+        for (var i = 0; i < found.length; i++) {
+            // 이미 그 빈 안에 있으면 건드리지 않는다
+            if (String(found[i].parent.nodeId) === String(target.nodeId)) { already++; continue; }
+            try { found[i].item.moveBin(target); moved++; }
+            catch (e) { /* 옮기지 못해도 넣는 것 자체는 성공이므로 넘어간다 */ }
+        }
+
+        return EddieDrop.ok({ count: found.length, moved: moved, already: already });
+    },
+
     levelClipsByPath: function (argStr) {
         try {
             var a = EddieDrop.parse(argStr);

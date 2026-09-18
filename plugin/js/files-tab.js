@@ -222,6 +222,9 @@
         if (item.isDir) { self.importFolder(item.fullPath); return; }   // 폴더는 통째로 불러오기
         self.place(item, mode);
       },
+      onDragged: function (item) {
+        Eddie.premiere.afterDrop(item, { binName: path ? Eddie.ui.prettyName(path.basename(self.dir)) : '내 파일' });
+      },
       onDragPrepare: function () { /* 이미 컴퓨터에 있는 파일이라 받을 게 없다 */ }
     });
     this.grid.defineGroup('files', { name: '내 파일' });

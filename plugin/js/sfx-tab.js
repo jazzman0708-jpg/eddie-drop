@@ -400,13 +400,13 @@
         e.dataTransfer.setData('text/plain', p);
       } catch (err) {}
       row.classList.add('dragging');
-      Eddie.premiere.afterDrop(item);   // 드롭 뒤 크기·레벨 맞추기 (dragend 가 안 올 수 있어 여기서 시작)
+      Eddie.premiere.afterDrop(item, { binName: 'Freesound' });   // 드롭 뒤 크기·레벨 맞추기 (dragend 가 안 올 수 있어 여기서 시작)
       Eddie.ui.status('끌어놓는 중 — 오디오 트랙에 놓으세요');
     });
     row.addEventListener('dragend', function () {
       row.classList.remove('dragging');
       // 드롭은 프리미어가 처리하므로, 들어온 클립을 찾아 레벨을 맞춘다
-      Eddie.premiere.afterDrop(item);
+      Eddie.premiere.afterDrop(item, { binName: 'Freesound' });
     });
     row.addEventListener('mousedown', function (e) {
       if (e.button !== 0) return;

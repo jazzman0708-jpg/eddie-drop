@@ -255,6 +255,9 @@
       },
       onActivate: function (item) { self.place(item, 'none'); },
       onPlace: function (item, mode) { self.place(item, mode); },
+      onDragged: function (item) {
+        Eddie.premiere.afterDrop(item, { binName: (Sources.adapters[item.source] || {}).name });
+      },
       onDragPrepare: function (item, silent) {
         if (!silent) Eddie.ui.toast('파일을 받는 중이에요 — 다 받으면 끌어놓을 수 있어요');
         Eddie.premiere.fetchOnly({

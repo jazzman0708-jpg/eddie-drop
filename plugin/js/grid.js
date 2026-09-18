@@ -308,9 +308,16 @@
       } catch (err) {}
       card.classList.add('dragging');
       Eddie.ui.status('끌어놓는 중 — 타임라인이나 프로젝트 패널에 놓으세요');
+
+      // 놓은 뒤 처리(빈으로 정리 등)를 여기서 시작한다.
+      // 프리미어 위에 놓으면 dragend 가 안 오는 경우가 있어 시작할 때 건다.
+      self.opts.onDragged && self.opts.onDragged(item);
     });
 
-    card.addEventListener('dragend', function () { card.classList.remove('dragging'); });
+    card.addEventListener('dragend', function () {
+      card.classList.remove('dragging');
+      self.opts.onDragged && self.opts.onDragged(item);   // 중복 호출은 afterDrop 이 막는다
+    });
 
     // 드래그를 한 번에 되게 하려고 미리 받아둔다
     function prefetch() {

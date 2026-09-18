@@ -217,7 +217,7 @@
    * → 클립이 생길 때까지 확인하다가, 찾으면
    *    효과음은 레벨을, 영상·이미지는 크기를 맞춘다.
    */
-  function afterDrop(item) {
+  function afterDrop(item, opts) {
     var s = Eddie.settings.get();
     if (!item.__path) return;
 
@@ -226,6 +226,13 @@
     if (item.__afterDropRunning) return;
     item.__afterDropRunning = true;
     setTimeout(function () { item.__afterDropRunning = false; }, 12000);
+
+    // 끌어놓기는 프리미어가 직접 불러오기 때문에 프로젝트 맨 위에 들어간다.
+    // 들어온 뒤에 찾아서 소스별 빈으로 옮긴다. (더블클릭·삽입과 같은 자리로)
+    var bin = binPath(item, opts && opts.binName);
+    poll('organizeByPath', { path: item.__path, bin: bin }, function (r) {
+      if (r && r.moved > 0) UI().status('[' + bin.join(' / ') + '] 빈으로 정리했어요', 'ok');
+    });
 
     var isAudio = (kindOf(item) === 'audio');
 
