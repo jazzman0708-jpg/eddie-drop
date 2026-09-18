@@ -1,7 +1,7 @@
 {
-  "version": "1.0.5",
-  "date": "2026-09-18",
-  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.5/eddie-drop-plugin-1.0.5.zip",
-  "sha256": "b0c48ee5c97a258db402b59ca2eafb5d5e0dd488c12f618e4532d736bd25eff4",
-  "notes": "끌어놓기로 넣은 파일도 이제 Eddie Drop 빈으로 정리됩니다\n전에는 더블클릭·삽입만 빈에 들어가고, 끌어놓기는 프로젝트 맨 위에 흩어졌습니다"
+  "version": "1.0.6",
+  "date": "2026-09-19",
+  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.6/eddie-drop-plugin-1.0.6.zip",
+  "sha256": "5a58459b4b928c4cf4b9942e5c08e46b250303b208b974a1c7f0166e1d36fbb2",
+  "notes": "이미지를 가져올 때 \"헤더 오류\" 가 나던 문제를 고쳤습니다 (PNG 가 jpg 로 저장되던 문제)\n효과음 태그 칩에 직접 추가한 한글 단어로도 검색되게 고쳤습니다"
 }
