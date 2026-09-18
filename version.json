@@ -1,7 +1,7 @@
 {
-  "version": "1.0.4",
+  "version": "1.0.5",
   "date": "2026-09-18",
-  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.4/eddie-drop-plugin-1.0.4.zip",
-  "sha256": "4da6ece7b25a3ae3409f683c4c09dc4fd2015c489acbd2fc7b5b0856fb80de01",
-  "notes": "맥 설치 뒷정리를 더 튼튼하게 고쳤습니다 (윈도우에서 겪은 것과 같은 종류의 문제 예방)"
+  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.5/eddie-drop-plugin-1.0.5.zip",
+  "sha256": "b0c48ee5c97a258db402b59ca2eafb5d5e0dd488c12f618e4532d736bd25eff4",
+  "notes": "끌어놓기로 넣은 파일도 이제 Eddie Drop 빈으로 정리됩니다\n전에는 더블클릭·삽입만 빈에 들어가고, 끌어놓기는 프로젝트 맨 위에 흩어졌습니다"
 }
