@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Eddie Drop (테스트용 — 배포 전 삭제)</title>
+<link rel="stylesheet" href="plugin/css/style.css">
+<script>
+/* ------------------------------------------------------------------
+   브라우저에서 패널을 검사하기 위한 스텁.
+   프리미어(CEP) 안에서는 이 파일을 쓰지 않는다. index.html 이 진짜다.
+------------------------------------------------------------------ */
+(function () {
+  var BASE = location.origin;
+
+  function xhrGet(url) {
+    var x = new XMLHttpRequest();
+    x.open('GET', url, false);
+    x.send(null);
+    if (x.status >= 400) throw new Error('없음: ' + url);
+    return x.responseText;
+  }
+
+  var fsStub = {
+    readdirSync: function (dir) {
+      if (/\/modules$/.test(dir) && dir.indexOf(BASE) === 0) return ['source-search'];
+      throw new Error('ENOENT ' + dir);
+    },
+    readFileSync: function (p) {
+      if (/\.(wav|mp3|mp4|gif|jpg|png)$/i.test(p)) {
+        var x = new XMLHttpRequest();
+        x.open('GET', p, false);
+        x.overrideMimeType('text/plain; charset=x-user-defined');
+        x.send(null);
+        var t = x.responseText, u = new Uint8Array(t.length);
+        for (var i = 0; i < t.length; i++) u[i] = t.charCodeAt(i) & 0xff;
+        return u;
+      }
+      return xhrGet(p);
+    },
+    statSync: function (p) {
+      if (/module\.json$/.test(p)) { xhrGet(p); return { isDirectory: function () { return false; }, isFile: function () { return true; }, size: 1 }; }
+      return { isDirectory: function () { return true; }, isFile: function () { return false; }, size: 0 };
+    },
+    existsSync: function () { return true; },
+    mkdirSync: function () {},
+    writeFileSync: function () {},
+    chmodSync: function () {},
+    unlinkSync: function () {},
+    renameSync: function () {},
+    createWriteStream: function () { return { on: function () {}, close: function (cb) { cb && cb(); } }; }
+  };
+
+  var pathStub = {
+    join: function () {
+      return Array.prototype.slice.call(arguments).filter(Boolean).join('/').replace(/([^:])\/\/+/g, '$1/');
+    },
+    basename: function (p) { return String(p).split('/').pop(); }
+  };
+
+  window.require = function (m) {
+    if (m === 'fs') return fsStub;
+    if (m === 'path') return pathStub;
+    if (m === 'os') return { homedir: function () { return '/Users/test'; } };
+    if (m === 'url') return { URL: window.URL };
+    if (m === 'https' || m === 'http') return { request: function () { throw new Error('테스트에선 통신 안 함'); }, get: function () { throw new Error('테스트에선 통신 안 함'); } };
+    if (m === 'child_process') return { exec: function () {} };
+    throw new Error('스텁 없음: ' + m);
+  };
+
+  // CEP 스텁
+  window.__adobe_cep__ = {
+    getHostEnvironment: function () {
+      return JSON.stringify({ appName: 'PPRO', appVersion: '26.3.0', appLocale: 'ko_KR',
+        appSkinInfo: { panelBackgroundColor: { color: { red: 40, green: 40, blue: 40 } } } });
+    },
+    getSystemPath: function () { return BASE; },
+    getExtensionId: function () { return 'com.eddie.drop.panel'; },
+    evalScript: function (script, cb) {
+      // 프리미어가 없으므로 그럴듯한 답을 돌려준다
+      if (script.indexOf('ED_call("ping"') >= 0) {
+        cb(JSON.stringify({ ok: true, data: { appName: 'Premiere Pro', version: '26.3.0',
+          projectName: '테스트.prproj', sequence: { name: '시퀀스 01', videoTracks: 3, audioTracks: 4 } } }));
+      } else {
+        cb(JSON.stringify({ ok: true, data: true }));
+      }
+    },
+    addEventListener: function () {},
+    removeEventListener: function () {},
+    dispatchEvent: function () {},
+    openURLInDefaultBrowser: function (u) { console.log('열기:', u); },
+    initResourceBundle: function () { return '{}'; },
+    getCurrentApiVersion: function () { return JSON.stringify({ major: 12, minor: 0, micro: 0 }); },
+    getExtensions: function () { return '[]'; },
+    requestOpenExtension: function () {},
+    registerKeyEventsInterest: function (json) { console.log('키 등록:', json); return true; }
+  };
+  window.cep = { fs: { showOpenDialog: function () { return { data: ['/Users/test/Documents/Eddie Drop'] }; } } };
+})();
+</script>
+</head>
+<body>
+<div id="app">
+  <nav id="tabbar"></nav>
+  <main id="views"></main>
+  <footer id="statusbar">
+    <span class="dot" id="status-dot"></span>
+    <span class="msg" id="status-msg">시작하는 중…</span>
+    <span id="status-ver"></span>
+  </footer>
+</div>
+<div id="toast"></div>
+
+<script src="js/CSInterface.js"></script>
+<script src="plugin/js/eddie.js"></script>
+<script src="plugin/js/platform.js"></script>
+<script src="plugin/js/settings.js"></script>
+<script src="plugin/js/net.js"></script>
+<script src="plugin/js/download.js"></script>
+<script src="plugin/js/cache.js"></script>
+<script src="plugin/js/host.js"></script>
+<script src="plugin/js/ui.js"></script>
+<script src="plugin/js/audio-level.js"></script>
+<script src="plugin/js/premiere.js"></script>
+<script src="plugin/js/shortcuts.js"></script>
+<script src="plugin/js/updater.js"></script>
+<script src="plugin/js/grid.js"></script>
+<script src="plugin/js/api/pexels.js"></script>
+<script src="plugin/js/api/pixabay.js"></script>
+<script src="plugin/js/api/giphy.js"></script>
+<script src="plugin/js/api/freesound.js"></script>
+<script src="plugin/js/sfx-dictionary.js"></script>
+<script src="plugin/js/media-tab.js"></script>
+<script src="plugin/js/giphy-tab.js"></script>
+<script src="plugin/js/sfx-tab.js"></script>
+<script src="plugin/js/files-tab.js"></script>
+<script src="plugin/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "id": "eddie-drop",
+  "name": "Eddie Drop",
+  "version": "0.5.0",
+  "update": {
+    "manifestUrl": "https://raw.githubusercontent.com/jazzman0708-jpg/eddie-drop/main/version.json",
+    "homepage": "https://github.com/jazzman0708-jpg/eddie-drop/releases"
+  },
+  "jsx": "jsx/host.jsx",
+  "styles": [
+    "css/style.css"
+  ],
+  "scripts": [
+    "js/eddie.js",
+    "js/platform.js",
+    "js/settings.js",
+    "js/net.js",
+    "js/download.js",
+    "js/cache.js",
+    "js/host.js",
+    "js/ui.js",
+    "js/audio-level.js",
+    "js/premiere.js",
+    "js/shortcuts.js",
+    "js/updater.js",
+    "js/grid.js",
+    "js/api/pexels.js",
+    "js/api/pixabay.js",
+    "js/api/giphy.js",
+    "js/api/freesound.js",
+    "js/sfx-dictionary.js",
+    "js/media-tab.js",
+    "js/giphy-tab.js",
+    "js/sfx-tab.js",
+    "js/files-tab.js",
+    "js/main.js"
+  ]
+}

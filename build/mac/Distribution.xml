@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>Eddie Drop</title>
+    <organization>com.eddie</organization>
+
+    <!-- 관리자 권한 없이 사용자 홈에만 설치한다 -->
+    <domains enable_anywhere="false" enable_currentUserHome="true" enable_localSystem="false"/>
+    <options customize="never" require-scripts="false" hostArchitectures="x86_64,arm64"/>
+
+    <welcome    file="welcome.html"    mime-type="text/html"/>
+    <conclusion file="conclusion.html" mime-type="text/html"/>
+
+    <choices-outline>
+        <line choice="default">
+            <line choice="com.eddie.drop.pkg"/>
+        </line>
+    </choices-outline>
+
+    <choice id="default"/>
+    <choice id="com.eddie.drop.pkg" visible="false">
+        <pkg-ref id="com.eddie.drop.pkg"/>
+    </choice>
+
+    <pkg-ref id="com.eddie.drop.pkg" version="@VERSION@" onConclusion="none">component.pkg</pkg-ref>
+</installer-gui-script>

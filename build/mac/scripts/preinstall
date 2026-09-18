@@ -1,0 +1,15 @@
+#!/bin/bash
+# 기존 버전을 지운다. 공용 설정 폴더(~/Library/Application Support/Eddie)는 절대 건드리지 않는다.
+set -e
+
+# 설치 대상 사용자의 홈 폴더 (pkg 는 $HOME 이 다를 수 있어 로그인 사용자 기준으로 잡는다)
+TARGET_HOME="$HOME"
+if [ -n "${USER:-}" ] && [ -d "/Users/$USER" ]; then TARGET_HOME="/Users/$USER"; fi
+
+OLD="$TARGET_HOME/Library/Application Support/Adobe/CEP/extensions/com.eddie.drop"
+
+if [ -d "$OLD" ]; then
+  rm -rf "$OLD"
+fi
+
+exit 0

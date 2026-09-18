@@ -1,0 +1,69 @@
+# ─────────────────────────────────────────────
+#  Eddie Drop — 저장소에 올리면 안 되는 것들
+#  (API 키·개인 파일이 실수로 올라가는 걸 막는다)
+# ─────────────────────────────────────────────
+
+# 1) 설정 파일 — API 키가 들어 있다
+#    실제 위치는 ~/Library/Application Support/Eddie/ 라 저장소 밖이지만,
+#    혹시 복사해 두더라도 올라가지 않게 막아둔다
+shared-settings.json
+*settings.json
+!.vscode/settings.json
+.env
+.env.*
+secrets.*
+*.secret
+
+# 2) 서명 인증서 · 비밀번호 — 절대 올리면 안 된다
+build/certs/
+*.p12
+*.pfx
+*.cer
+*.key
+*.pem
+password.txt
+
+# 3) 만들다 생기는 것들
+build/.work/
+# ZXPSignCmd — 어도비에서 따로 받는 실행 파일 (6MB)
+build/tools/
+dist/
+*.zxp
+*.pkg
+*.exe
+*.dmg
+
+# 4) 다운로드한 소스 파일 (스톡 영상·이미지·효과음)
+#    기본 저장 위치는 ~/Documents/Eddie Drop 이지만 혹시 몰라 막아둔다
+Eddie Drop/
+_thumbs/
+*.mp4
+*.mov
+*.m4v
+*.webm
+*.gif
+*.mp3
+*.wav
+*.aiff
+*.aif
+*.flac
+*.ogg
+
+# 5) 개발용 표시 파일 — 이게 올라가면 사용자 쪽 업데이트가 매번 지워진다
+.dev
+.debug
+
+# 6) 프로그램·에디터가 만드는 찌꺼기
+node_modules/
+package-lock.json
+.DS_Store
+.AppleDouble
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.log
+.claude/

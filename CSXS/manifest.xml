@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionManifest
+  ExtensionBundleId="com.eddie.drop"
+  ExtensionBundleVersion="0.5.0"
+  ExtensionBundleName="Eddie Drop"
+  Version="7.0">
+
+  <ExtensionList>
+    <!-- 패널 ID는 고정입니다.
+         나중에 "Eddie 대시보드" 확장이 아래 ID로 이 패널을 엽니다.
+         CSInterface.requestOpenExtension("com.eddie.drop.panel", "") -->
+    <Extension Id="com.eddie.drop.panel" Version="0.5.0"/>
+  </ExtensionList>
+
+  <ExecutionEnvironment>
+    <HostList>
+      <Host Name="PPRO" Version="[14.0,99.9]"/>
+    </HostList>
+    <LocaleList>
+      <Locale Code="All"/>
+    </LocaleList>
+    <RequiredRuntimeList>
+      <!-- 9.0 으로 두면 CEP 9/10/11/12 모두에서 로드됩니다 -->
+      <RequiredRuntime Name="CSXS" Version="9.0"/>
+    </RequiredRuntimeList>
+  </ExecutionEnvironment>
+
+  <DispatchInfoList>
+    <Extension Id="com.eddie.drop.panel">
+      <DispatchInfo>
+        <Resources>
+          <MainPath>./index.html</MainPath>
+          <ScriptPath>./jsx/boot.jsx</ScriptPath>
+          <CEFCommandLine>
+            <Parameter>--allow-file-access</Parameter>
+            <Parameter>--allow-file-access-from-files</Parameter>
+            <Parameter>--enable-nodejs</Parameter>
+            <Parameter>--mixed-context</Parameter>
+          </CEFCommandLine>
+        </Resources>
+        <Lifecycle>
+          <AutoVisible>true</AutoVisible>
+        </Lifecycle>
+        <UI>
+          <Type>Panel</Type>
+          <Menu>Eddie Drop</Menu>
+          <Geometry>
+            <Size>    <Width>420</Width>  <Height>640</Height> </Size>
+            <MinSize> <Width>320</Width>  <Height>320</Height> </MinSize>
+            <MaxSize> <Width>2200</Width> <Height>2200</Height></MaxSize>
+          </Geometry>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+  </DispatchInfoList>
+</ExtensionManifest>
