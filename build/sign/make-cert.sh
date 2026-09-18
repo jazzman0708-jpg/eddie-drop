@@ -15,7 +15,10 @@ if [ -f "$CERTS/selfsigned.p12" ]; then
 fi
 
 # 비밀번호는 무작위로 만들어 파일로 보관한다 (배포본에는 들어가지 않는다)
-PASS="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 24)"
+# openssl 로 만든다.
+# (tr </dev/urandom | head -c 24 방식은 head 가 파이프를 먼저 닫아서
+#  pipefail 에 걸려 스크립트가 조용히 죽는다)
+PASS="$(openssl rand -base64 32 | LC_ALL=C tr -dc 'A-Za-z0-9')"
 printf '%s' "$PASS" > "$CERTS/password.txt"
 chmod 600 "$CERTS/password.txt"
 

@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# 설치 직후 정리.
+#
+# macOS 가 파일마다 자동으로 붙이는 확장 속성(com.apple.provenance) 때문에
+# 설치 과정에서 "._이름" 짝꿍 파일이 함께 만들어진다.
+# 이 파일들이 남아 있으면 확장 폴더가 지저분하고,
+# CEP 가 서명을 확인할 때 예상에 없던 파일로 보일 수 있다.
+#
+# 설정 폴더(~/Library/Application Support/Eddie)는 절대 건드리지 않는다.
+#
+set -u
+
+# 설치 대상 사용자의 홈 폴더 (preinstall 과 같은 방식)
+TARGET_HOME="$HOME"
+if [ -n "${USER:-}" ] && [ -d "/Users/$USER" ]; then TARGET_HOME="/Users/$USER"; fi
+
+EXT="$TARGET_HOME/Library/Application Support/Adobe/CEP/extensions/com.eddie.drop"
+
+if [ -d "$EXT" ]; then
+  find "$EXT" -name '._*' -delete 2>/dev/null
+  find "$EXT" -name '.DS_Store' -delete 2>/dev/null
+fi
+
+exit 0

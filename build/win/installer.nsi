@@ -44,7 +44,7 @@ VIAddVersionKey /LANG=1042 "LegalCopyright"  "${PUBLISHER}"
 !define MUI_WELCOMEPAGE_TEXT  "프리미어 프로에서 영상 · 이미지 · GIF · 효과음을 찾아 바로 타임라인에 넣는 패널입니다.$\r$\n$\r$\n설치 위치는 사용자 폴더 안이라 관리자 암호가 필요 없습니다.$\r$\n기존에 설치돼 있으면 새 버전으로 바뀌며, 입력해 둔 API 키와 설정은 그대로 유지됩니다.$\r$\n$\r$\n설치하기 전에 프리미어 프로를 종료해 주세요."
 
 !define MUI_FINISHPAGE_TITLE "설치가 끝났습니다"
-!define MUI_FINISHPAGE_TEXT  "프리미어를 재시작한 뒤$\r$\nWindow → Extensions 에서 열어주세요.$\r$\n$\r$\n처음 열면 설정 탭에서 API 키를 넣어야 검색이 됩니다.$\r$\n내 컴퓨터에 있는 파일은 키 없이 '내 파일' 탭에서 바로 쓸 수 있습니다."
+!define MUI_FINISHPAGE_TEXT  "프리미어를 재시작한 뒤$\r$\n창 → 확장명 에서 열어주세요.$\r$\n$\r$\n처음 열면 설정 탭에서 API 키를 넣어야 검색이 됩니다.$\r$\n내 컴퓨터에 있는 파일은 키 없이 '내 파일' 탭에서 바로 쓸 수 있습니다."
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 
 !insertmacro MUI_PAGE_WELCOME

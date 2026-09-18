@@ -24,7 +24,9 @@ TARGET="${1:-all}"
 
 # 배포본에 넣지 않을 것들 (개발용)
 EXCLUDES=(
-  "build" "dist" ".git" ".github" ".gitignore" ".debug" ".dev" "__test.html" ".DS_Store" "README.md"
+  "build" "dist" ".git" ".github" ".gitignore" ".debug" ".dev" "__test.html" ".DS_Store"
+  # 개발자·배포자용 문서는 사용자 확장 폴더에 넣지 않는다
+  "README.md" "docs" "배포방법.md" "설치방법.md" "version.json"
 )
 
 say()  { printf "\033[36m▶ %s\033[0m\n" "$*"; }
@@ -60,6 +62,11 @@ stage() {
   for e in "${EXCLUDES[@]}"; do args+=(--exclude="$e"); done
 
   rsync -a "${args[@]}" "$ROOT/" "$WORK/stage/"
+
+  # macOS 확장 속성 제거.
+  # 안 지우면 pkgbuild 가 파일마다 ._이름 짝꿍 파일을 만들어 설치 폴더가 지저분해진다.
+  xattr -cr "$WORK/stage" 2>/dev/null || true
+  find "$WORK/stage" -name '._*' -delete 2>/dev/null || true
 
   # 개발용 파일이 남아 있으면 실수다
   [ -e "$WORK/stage/.debug" ]        && die "배포본에 .debug 가 남아 있습니다"
@@ -110,6 +117,10 @@ sign_extension() {
   unzip -q "$WORK/$APP_NAME.zxp" -d "$WORK/payload/$BUNDLE_ID"
 
   [ -d "$WORK/payload/$BUNDLE_ID/META-INF" ] || die "서명 파일(META-INF)이 없습니다"
+
+  # 압축을 풀면서 다시 붙은 확장 속성도 지운다
+  xattr -cr "$WORK/payload" 2>/dev/null || true
+  find "$WORK/payload" -name '._*' -delete 2>/dev/null || true
   ok "서명 완료 · $(du -sh "$WORK/payload/$BUNDLE_ID" | cut -f1)"
 }
 
@@ -133,8 +144,9 @@ build_mac() {
 
   # 기존 버전을 지우는 스크립트 (공용 설정 폴더는 건드리지 않는다)
   mkdir -p "$WORK/scripts"
-  cp "$HERE/mac/scripts/preinstall" "$WORK/scripts/preinstall"
-  chmod +x "$WORK/scripts/preinstall"
+  cp "$HERE/mac/scripts/preinstall"  "$WORK/scripts/preinstall"
+  cp "$HERE/mac/scripts/postinstall" "$WORK/scripts/postinstall"
+  chmod +x "$WORK/scripts/preinstall" "$WORK/scripts/postinstall"
 
   pkgbuild \
     --root "$WORK/payload" \
