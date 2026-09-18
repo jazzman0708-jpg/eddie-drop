@@ -209,18 +209,32 @@ ok "릴리스 만듦 · zip 첨부 완료"
 # ------------------------------------------------------------------
 # 6. 패널이 실제로 볼 주소가 살아 있는지 확인
 # ------------------------------------------------------------------
-say "패널이 보는 주소 확인 중…"
-RAW="https://raw.githubusercontent.com/$OWNER/$REPO/main/version.json"
-sleep 3
-for i in 1 2 3 4 5; do
-  GOT="$(curl -fsSL "$RAW" 2>/dev/null | python3 -c "import sys,json;print(json.load(sys.stdin)['version'])" 2>/dev/null || true)"
-  [ "$GOT" = "$VERSION" ] && break
-  sleep 4
-done
-if [ "${GOT:-}" = "$VERSION" ]; then
-  ok "version.json 반영됨 (v$GOT)"
+say "확인 중…"
+
+# (1) 저장소에 제대로 들어갔는지 — 이건 바로 확인된다
+ONREPO="$(gh api "repos/$OWNER/$REPO/contents/version.json" --jq '.content' 2>/dev/null \
+          | base64 -d 2>/dev/null \
+          | python3 -c "import sys,json;print(json.load(sys.stdin)['version'])" 2>/dev/null || true)"
+if [ "$ONREPO" = "$VERSION" ]; then
+  ok "저장소에 version.json 반영됨 (v$VERSION)"
 else
-  warn "version.json 이 아직 안 보입니다. 1~2분 뒤면 반영됩니다."
+  die "저장소의 version.json 이 v$VERSION 이 아닙니다 (읽은 값: ${ONREPO:-없음})"
+fi
+
+# (2) 패널이 실제로 읽는 주소는 깃허브 CDN 을 거쳐서 최대 5분 늦다
+RAW="https://raw.githubusercontent.com/$OWNER/$REPO/main/version.json"
+GOT=""
+for i in $(seq 1 10); do
+  GOT="$(curl -fsSL "$RAW?t=$(date +%s)$i" 2>/dev/null \
+        | python3 -c "import sys,json;print(json.load(sys.stdin)['version'])" 2>/dev/null || true)"
+  [ "$GOT" = "$VERSION" ] && break
+  sleep 15
+done
+if [ "$GOT" = "$VERSION" ]; then
+  ok "패널이 보는 주소에도 반영됨"
+else
+  warn "패널이 보는 주소는 아직 v${GOT:-?} 입니다."
+  echo "   깃허브 CDN 캐시 때문이며, 몇 분 뒤 저절로 바뀝니다. 배포 자체는 정상입니다."
 fi
 
 CODE="$(curl -s -o /dev/null -w '%{http_code}' -L "$URL")"
