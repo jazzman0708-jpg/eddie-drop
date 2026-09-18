@@ -1,7 +1,7 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "date": "2026-09-18",
-  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.1/eddie-drop-plugin-1.0.1.zip",
-  "sha256": "6d3d9aeb4b3570fd6696deb7364a7094223f3ade11bf1eaecf0baf11e8bb62f3",
-  "notes": "설정 탭에 문의하기를 추가했습니다 (rookietwo@naver.com)\n메일 보내기를 누르면 버전 정보가 채워진 메일이 바로 열립니다"
+  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.2/eddie-drop-plugin-1.0.2.zip",
+  "sha256": "084d0c9da053d771f20ef3a0147af3392cd5f6c71be3680d8e4df6ddeffe96d0",
+  "notes": "지원 프리미어 버전을 24.0 이상으로 정확히 맞췄습니다\n전에는 14.0 이상이라고 적혀 있어서, 구버전에서 설치는 되는데 화면이 깨졌습니다"
 }

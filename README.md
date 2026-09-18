@@ -5,7 +5,10 @@ Pexels · Pixabay · GIPHY · Freesound 에서 영상 · 이미지 · GIF · 효
 
 - 번들 ID: `com.eddie.drop`
 - **패널 ID: `com.eddie.drop.panel` (고정 — 바꾸지 말 것)**
-- 대상: Adobe Premiere Pro 14.0 ~ (CEP 9~12)
+- 대상: Adobe Premiere Pro **24.0 이상** (CEP 11 / 12)
+  - 화면에 `aspect-ratio`(크롬 88) · `inset`(87) · flex `gap`(84) 을 쓰고,
+    업데이트에 Node `fs.rmSync`(14.14) 를 써서 크롬 88 / Node 15 이상이 필요합니다.
+  - 프리미어 15.4~23 도 이론상 되지만(CEP 11) 검증하지 않아 범위에서 뺐습니다.
 - 패널 위치: **Window → Extensions → Eddie Drop**
 
 ## 다른 에디 플러그인과의 연결

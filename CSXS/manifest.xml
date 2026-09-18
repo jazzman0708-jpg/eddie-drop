@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ExtensionManifest
   ExtensionBundleId="com.eddie.drop"
-  ExtensionBundleVersion="1.0.1"
+  ExtensionBundleVersion="1.0.2"
   ExtensionBundleName="Eddie Drop"
   Version="7.0">
 
@@ -9,18 +9,20 @@
     <!-- 패널 ID는 고정입니다.
          나중에 "Eddie 대시보드" 확장이 아래 ID로 이 패널을 엽니다.
          CSInterface.requestOpenExtension("com.eddie.drop.panel", "") -->
-    <Extension Id="com.eddie.drop.panel" Version="1.0.1"/>
+    <Extension Id="com.eddie.drop.panel" Version="1.0.2"/>
   </ExtensionList>
 
   <ExecutionEnvironment>
     <HostList>
-      <Host Name="PPRO" Version="[14.0,99.9]"/>
+      <Host Name="PPRO" Version="[24.0,99.9]"/>
     </HostList>
     <LocaleList>
       <Locale Code="All"/>
     </LocaleList>
     <RequiredRuntimeList>
-      <!-- 9.0 으로 두면 CEP 9/10/11/12 모두에서 로드됩니다 -->
+      <!-- 지원 범위는 위의 Host 한 줄로만 건다 (문서에 규정된 방식).
+           RequiredRuntime 은 "이상"인지 "정확히"인지 어도비 문서에 명시가 없어서,
+           여러 CEP 에서 확실히 로드되는 9.0 을 그대로 둔다. -->
       <RequiredRuntime Name="CSXS" Version="9.0"/>
     </RequiredRuntimeList>
   </ExecutionEnvironment>
