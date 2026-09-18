@@ -1,7 +1,7 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.3",
   "date": "2026-09-18",
-  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.2/eddie-drop-plugin-1.0.2.zip",
-  "sha256": "084d0c9da053d771f20ef3a0147af3392cd5f6c71be3680d8e4df6ddeffe96d0",
-  "notes": "지원 프리미어 버전을 24.0 이상으로 정확히 맞췄습니다\n전에는 14.0 이상이라고 적혀 있어서, 구버전에서 설치는 되는데 화면이 깨졌습니다"
+  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.3/eddie-drop-plugin-1.0.3.zip",
+  "sha256": "21063acc6b3a09c2b3beea93a8e1e10a3656679ce35cd18c51c592495c9807d6",
+  "notes": "윈도우에서 패널이 안 뜨던 문제를 고쳤습니다\n설치 화면 한글이 깨지던 것도 고쳤습니다"
 }
