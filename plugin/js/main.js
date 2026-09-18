@@ -259,6 +259,9 @@
     // ---- 업데이트 ----
     root.appendChild(updateSection());
 
+    // ---- 문의하기 ----
+    root.appendChild(contactSection());
+
     // ---- 진단 ----
     sec = el('div', 'section');
     sec.appendChild(el('h2', null, '진단'));
@@ -352,6 +355,97 @@
 
     paint();
     return f;
+  }
+
+  // ==================================================================
+  // 문의하기
+  // ==================================================================
+  var CONTACT_EMAIL = 'rookietwo@naver.com';
+
+  /** 메일에 미리 채워 넣을 환경 정보 (개인 정보는 담지 않는다) */
+  function envLines() {
+    var lines = [];
+    lines.push('Eddie Drop ' + Eddie.version);
+    lines.push(Eddie.platform.isWin ? 'Windows' : 'macOS');
+    var d = Eddie.premiere.lastPing;
+    if (d) lines.push('Premiere Pro ' + d.version);
+    return lines;
+  }
+
+  function contactSection() {
+    var sec = el('div', 'section');
+    sec.appendChild(el('h2', null, '문의하기'));
+    sec.appendChild(el('p', 'hint',
+      '잘 안 되는 부분이나 있었으면 하는 기능을 알려주세요.<br>' +
+      '아래 버튼을 누르면 버전 정보가 채워진 메일이 열립니다.'));
+
+    var row = el('div', 'row');
+    var addr = el('code', 'contact-mail');
+    addr.textContent = CONTACT_EMAIL;
+    row.appendChild(addr);
+    sec.appendChild(row);
+
+    var stat = el('div', 'status');
+
+    var btns = el('div', 'row');
+    btns.appendChild(ui.button('btn primary', '메일 보내기', function () {
+      var body = [
+        '',
+        '',
+        '─────────────────',
+        '아래는 문제를 찾는 데 쓰이는 정보입니다. 지우지 말아주세요.'
+      ].concat(envLines()).join('\n');
+
+      var url = 'mailto:' + CONTACT_EMAIL +
+                '?subject=' + encodeURIComponent('[Eddie Drop ' + Eddie.version + '] 문의') +
+                '&body=' + encodeURIComponent(body);
+      Eddie.host.openUrl(url);
+      stat.className = 'status';
+      stat.textContent = '메일 프로그램이 열리지 않으면 위 주소로 직접 보내주세요.';
+    }));
+
+    btns.appendChild(ui.button('btn', '주소 복사', function () {
+      var ok = false;
+      try {
+        var t = document.createElement('textarea');
+        t.value = CONTACT_EMAIL;
+        document.body.appendChild(t);
+        t.select();
+        ok = document.execCommand('copy');
+        document.body.removeChild(t);
+      } catch (e) {}
+      ui.toast(ok ? '주소를 복사했습니다.' : '복사하지 못했습니다. 위 주소를 직접 적어주세요.');
+      ui.repin();
+    }));
+
+    btns.appendChild(ui.button('btn', '환경 정보 복사', function () {
+      var text = envLines().join('\n');
+      var ok = false;
+      try {
+        var t = document.createElement('textarea');
+        t.value = text;
+        document.body.appendChild(t);
+        t.select();
+        ok = document.execCommand('copy');
+        document.body.removeChild(t);
+      } catch (e) {}
+      ui.toast(ok ? '환경 정보를 복사했습니다. 메일에 붙여넣어 주세요.' : '복사하지 못했습니다.');
+      ui.repin();
+    }));
+
+    sec.appendChild(btns);
+    sec.appendChild(stat);
+
+    // 설정 화면은 프리미어 연결 확인보다 먼저 그려진다.
+    // 그래서 프리미어 버전은 나중에 채워 넣는다.
+    contactEnvEl = el('p', 'hint', envLines().join(' · '));
+    sec.appendChild(contactEnvEl);
+    return sec;
+  }
+
+  var contactEnvEl = null;
+  function refreshContactEnv() {
+    if (contactEnvEl) contactEnvEl.innerHTML = envLines().join(' · ');
   }
 
   // ==================================================================
@@ -666,6 +760,7 @@
 
     Eddie.premiere.ping().then(function (d) {
       ui.status('프리미어 연결됨 · ' + (d.projectName || '프로젝트 없음'), 'ok');
+      refreshContactEnv();
     }).catch(function (e) {
       console.error(e);
       // 프리미어 쪽 기능 파일을 못 읽은 경우가 대부분이다 — 진짜 이유를 보여준다

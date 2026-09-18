@@ -301,7 +301,14 @@
     preload: preload,
     afterDrop: afterDrop,
     levelAfterDrop: afterDrop,   // 예전 이름
-    ping:         function ()     { return Eddie.host.core('ping'); },
+    // 마지막으로 확인한 프리미어 정보 (문의 메일에 버전을 적을 때 쓴다)
+    lastPing: null,
+    ping: function () {
+      return Eddie.host.core('ping').then(function (d) {
+        Eddie.premiere.lastPing = d;
+        return d;
+      });
+    },
     hasSequence:  function ()     { return Eddie.host.core('hasActiveSequence'); },
     openInSource: function (args) { return Eddie.host.core('openInSource', args); },
     place:        function (args) { return Eddie.host.core('place', args); }

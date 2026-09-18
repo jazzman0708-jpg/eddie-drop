@@ -850,3 +850,16 @@ label.check.mini input[type=checkbox]{ width:12px; height:12px; }
 #update-block p{ margin:0 0 14px; color:var(--text-dim); }
 #update-block .ub-row{ display:flex; justify-content:center; gap:6px; }
 #update-block .ub-status{ margin-top:10px; color:var(--text-dim); font-size:11px; }
+
+/* ---------- 문의하기 ---------- */
+.contact-mail{
+  display:inline-block;
+  padding:5px 9px;
+  background:var(--bg-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  font-family:"SFMono-Regular",Consolas,monospace;
+  color:var(--text);
+  -webkit-user-select:text;
+  user-select:text;
+}
