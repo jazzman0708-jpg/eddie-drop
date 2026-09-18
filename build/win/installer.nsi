@@ -1,4 +1,4 @@
-; Eddie Drop - 윈도우 설치 프로그램 (NSIS)
+﻿; Eddie Drop - 윈도우 설치 프로그램 (NSIS)
 ;
 ; 만드는 법
 ;   makensis -DVERSION=0.4.0 -DPAYLOAD=<서명된 확장 폴더> -DOUTFILE=<나올 exe> installer.nsi

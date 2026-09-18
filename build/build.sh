@@ -199,6 +199,10 @@ EOF
     return 1
   fi
 
+  # NSIS 는 BOM 이 없으면 소스를 ANSI 로 읽어서 한글이 전부 깨진다
+  head -c 3 "$HERE/win/installer.nsi" | od -An -tx1 | tr -d ' \n' | grep -q "efbbbf" \
+    || die "installer.nsi 에 UTF-8 BOM 이 없습니다 — 설치 화면 한글이 깨집니다"
+
   say "윈도우 설치 파일 만드는 중…"
   makensis -NOCD \
     "-DVERSION=$VERSION" \

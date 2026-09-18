@@ -1,0 +1,114 @@
+name: 윈도우 설치 진단
+
+# 윈도우 실기기에서 설치 파일이 제대로 도는지 확인한다.
+# .exe 를 조용히 설치한 뒤, 실제로 깔린 파일을 원본과 대조한다.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  mac-payload:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ZXPSignCmd 받기
+        run: |
+          mkdir -p build/tools
+          curl -sSL -o build/tools/ZXPSignCmd \
+            https://raw.githubusercontent.com/Adobe-CEP/CEP-Resources/master/ZXPSignCMD/4.1.3/macOS/ZXPSignCmd
+          chmod +x build/tools/ZXPSignCmd
+          xattr -d com.apple.quarantine build/tools/ZXPSignCmd || true
+
+      - name: 서명 인증서 준비
+        env:
+          CERT_BASE64: ${{ secrets.CEP_CERT_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.CEP_CERT_PASSWORD }}
+        run: |
+          mkdir -p build/certs
+          echo "$CERT_BASE64" | base64 --decode > build/certs/selfsigned.p12
+          printf '%s' "$CERT_PASSWORD" > build/certs/password.txt
+
+      - name: 서명된 확장 폴더 만들기
+        run: ./build/build.sh mac
+
+      - name: 원본 파일 목록 기록
+        run: |
+          cd build/.work/payload/com.eddie.drop
+          find . -type f | sed 's|^\./||' | sort > /tmp/expected.txt
+          echo "원본 파일 수: $(wc -l < /tmp/expected.txt)"
+          cat /tmp/expected.txt
+          cp /tmp/expected.txt ../../expected.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: payload-and-list
+          path: |
+            build/.work/payload/
+            build/.work/expected.txt
+          include-hidden-files: true
+          retention-days: 1
+
+  win-install:
+    runs-on: windows-latest
+    needs: mac-payload
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: payload-and-list
+          path: art
+
+      - name: NSIS 설치
+        run: choco install nsis -y --no-progress
+
+      - name: .exe 만들기
+        shell: cmd
+        run: |
+          mkdir dist
+          "C:\Program Files (x86)\NSIS\makensis.exe" ^
+            /DVERSION=9.9.9 ^
+            /DPAYLOAD=%CD%\art\payload\com.eddie.drop ^
+            /DOUTFILE=%CD%\dist\test.exe ^
+            build\win\installer.nsi
+
+      - name: 조용히 설치하기
+        shell: cmd
+        run: |
+          dist\test.exe /S
+          ping -n 8 127.0.0.1 > nul
+
+      - name: 실제로 깔린 파일 확인
+        shell: pwsh
+        run: |
+          $ext = "$env:APPDATA\Adobe\CEP\extensions\com.eddie.drop"
+          Write-Host "=== 설치 경로: $ext"
+          if (-not (Test-Path $ext)) { Write-Host "::error::설치 폴더가 없습니다"; exit 1 }
+
+          $got = Get-ChildItem -Recurse -File -Force $ext |
+                 ForEach-Object { $_.FullName.Substring($ext.Length+1).Replace('\','/') } |
+                 Sort-Object
+          Write-Host "=== 깔린 파일 $($got.Count)개"
+          $got | ForEach-Object { Write-Host "   $_" }
+
+          $want = Get-Content art/expected.txt | Sort-Object
+          Write-Host "=== 있어야 할 파일 $($want.Count)개"
+
+          $missing = Compare-Object $want $got | Where-Object { $_.SideIndicator -eq '<=' }
+          $extra   = Compare-Object $want $got | Where-Object { $_.SideIndicator -eq '=>' }
+
+          if ($missing) {
+            Write-Host "::error::빠진 파일 $($missing.Count)개 ↓"
+            $missing | ForEach-Object { Write-Host "   빠짐: $($_.InputObject)" }
+          } else { Write-Host "빠진 파일 없음 OK" }
+
+          if ($extra) {
+            $extra | ForEach-Object { Write-Host "   추가됨: $($_.InputObject)" }
+          }
+
+          Write-Host "=== CEP 가 꼭 봐야 하는 것"
+          foreach ($f in @('CSXS/manifest.xml','META-INF/signatures.xml','mimetype','index.html')) {
+            $p = Join-Path $ext $f.Replace('/','\')
+            Write-Host ("   {0,-28} {1}" -f $f, $(if (Test-Path $p) { "있음 (" + (Get-Item $p).Length + " bytes)" } else { "없음 !!" }))
+          }
