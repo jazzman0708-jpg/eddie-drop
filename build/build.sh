@@ -164,6 +164,14 @@ build_mac() {
     --package-path "$WORK" \
     "$out" >/dev/null
 
+  # postinstall 이 안 들어가면 ._ 군더더기가 남아 패널이 안 뜬다 — 꼭 확인한다
+  local chk="$WORK/pkgcheck"
+  rm -rf "$chk"
+  pkgutil --expand "$out" "$chk" >/dev/null 2>&1
+  [ -f "$chk"/*.pkg/Scripts/postinstall ] 2>/dev/null || \
+    ls "$chk"/*.pkg/Scripts >/dev/null 2>&1 || die "pkg 안에 설치 스크립트가 없습니다"
+  rm -rf "$chk"
+
   ok "맥: $(basename "$out")  ($(du -h "$out" | cut -f1))"
   echo "   $out"
 

@@ -1,7 +1,7 @@
 {
-  "version": "1.0.3",
+  "version": "1.0.4",
   "date": "2026-09-18",
-  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.3/eddie-drop-plugin-1.0.3.zip",
-  "sha256": "21063acc6b3a09c2b3beea93a8e1e10a3656679ce35cd18c51c592495c9807d6",
-  "notes": "윈도우에서 패널이 안 뜨던 문제를 고쳤습니다\n설치 화면 한글이 깨지던 것도 고쳤습니다"
+  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.4/eddie-drop-plugin-1.0.4.zip",
+  "sha256": "4da6ece7b25a3ae3409f683c4c09dc4fd2015c489acbd2fc7b5b0856fb80de01",
+  "notes": "맥 설치 뒷정리를 더 튼튼하게 고쳤습니다 (윈도우에서 겪은 것과 같은 종류의 문제 예방)"
 }
