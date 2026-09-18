@@ -84,7 +84,13 @@
     });
   }
 
+  /** 주소에서 확장자를 읽는다 (Pixabay 는 png 도 준다 — jpg 로 고정하면 안 된다) */
+  function imgExt(url) {
+    return (Eddie.download && Eddie.download.extFromUrl) ? Eddie.download.extFromUrl(url, 'jpg') : 'jpg';
+  }
+
   function normalizeImage(h) {
+    var full = h.imageURL || h.fullHDURL || h.largeImageURL;
     return {
       source: 'pixabay',
       sourceName: 'Pixabay',
@@ -99,11 +105,11 @@
       thumb: h.webformatURL,
       thumbNeedsCache: true,              // 핫링크 금지 → 로컬에 받아서 표시
       files: [
-        { label: '원본', url: h.imageURL || h.fullHDURL || h.largeImageURL, width: h.imageWidth, height: h.imageHeight, ext: 'jpg' },
-        { label: 'Large', url: h.largeImageURL, width: 1280, ext: 'jpg' },
-        { label: 'Web', url: h.webformatURL, width: h.webformatWidth, ext: 'jpg' }
+        { label: '원본', url: full, width: h.imageWidth, height: h.imageHeight, ext: imgExt(full) },
+        { label: 'Large', url: h.largeImageURL, width: 1280, ext: imgExt(h.largeImageURL) },
+        { label: 'Web', url: h.webformatURL, width: h.webformatWidth, ext: imgExt(h.webformatURL) }
       ].filter(function (f) { return !!f.url; }),
-      ext: 'jpg'
+      ext: imgExt(full)
     };
   }
 

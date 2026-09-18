@@ -54,6 +54,80 @@
     return path.join(dirFor(opts.source), parts.join('_') + '.' + ext);
   }
 
+  /**
+   * 파일 앞부분을 읽어 진짜 종류를 알아낸다.
+   *
+   * 사이트가 알려주는 확장자와 실제 파일이 다른 경우가 있다.
+   * (Pixabay 는 .png 를 주는데 우리가 .jpg 로 저장하던 문제)
+   * 프리미어는 확장자를 보고 파일을 열기 때문에, 안 맞으면
+   * "헤더 오류로 인해 파일을 열 수 없습니다" 가 뜬다.
+   */
+  function sniffExt(p) {
+    var fd, buf = Buffer.alloc(16), n = 0;
+    try {
+      fd = fs.openSync(p, 'r');
+      n = fs.readSync(fd, buf, 0, 16, 0);
+    } catch (e) { return null; }
+    finally { try { if (fd !== undefined) fs.closeSync(fd); } catch (e) {} }
+    if (n < 12) return null;
+
+    var h = buf.toString('hex');
+    if (h.indexOf('ffd8ff') === 0) return 'jpg';
+    if (h.indexOf('89504e470d0a1a0a') === 0) return 'png';
+    if (h.indexOf('474946383') === 0) return 'gif';
+    if (h.indexOf('52494646') === 0) {                 // RIFF
+      var tag = buf.toString('ascii', 8, 12);
+      if (tag === 'WEBP') return 'webp';
+      if (tag === 'WAVE') return 'wav';
+    }
+    if (buf.toString('ascii', 4, 8) === 'ftyp') {
+      var brand = buf.toString('ascii', 8, 12);
+      return (brand.indexOf('qt') === 0) ? 'mov' : 'mp4';
+    }
+    if (buf.toString('ascii', 0, 3) === 'ID3') return 'mp3';
+    if (buf[0] === 0xff && (buf[1] & 0xe0) === 0xe0) return 'mp3';
+    if (h.indexOf('4f676753') === 0) return 'ogg';
+    if (h.indexOf('664c6143') === 0) return 'flac';
+    return null;
+  }
+
+  /** 확장자만 바꾼 경로 */
+  function withExt(p, ext) {
+    return path.join(path.dirname(p), path.basename(p, path.extname(p)) + '.' + ext);
+  }
+
+  /**
+   * 파일 내용과 확장자가 다르면 이름을 바로잡는다.
+   * → 실제로 쓸 경로
+   */
+  function fixExt(p) {
+    var real = sniffExt(p);
+    if (!real) return p;
+    var cur = path.extname(p).replace('.', '').toLowerCase();
+    if (cur === real) return p;
+    if (cur === 'jpeg' && real === 'jpg') return p;
+    var fixed = withExt(p, real);
+    try { fs.renameSync(p, fixed); return fixed; }
+    catch (e) { return p; }
+  }
+
+  /** 이름은 같고 확장자만 다른 파일이 이미 있으면 그것을 쓴다 */
+  function existingVariant(dest) {
+    var dir = path.dirname(dest);
+    var base = path.basename(dest, path.extname(dest)) + '.';
+    try {
+      var names = fs.readdirSync(dir);
+      for (var i = 0; i < names.length; i++) {
+        if (/\.part$/.test(names[i])) continue;      // 받다 만 임시 파일은 쓰지 않는다
+        if (names[i].indexOf(base) === 0) {
+          var p2 = path.join(dir, names[i]);
+          if (existsWithSize(p2)) return p2;
+        }
+      }
+    } catch (e) {}
+    return null;
+  }
+
   function existsWithSize(p) {
     try {
       var st = fs.statSync(p);
@@ -74,7 +148,9 @@
       try { dest = opts.destPath || buildPath(opts); }
       catch (e) { reject(new Error('저장 폴더를 만들지 못했습니다: ' + e.message)); return; }
 
-      if (existsWithSize(dest)) { resolve({ path: dest, cached: true }); return; }
+      // 이미 받아둔 게 있으면 그것을 쓴다. 확장자가 틀렸으면 이때 바로잡는다.
+      var have = existsWithSize(dest) ? dest : existingVariant(dest);
+      if (have) { resolve({ path: fixExt(have), cached: true }); return; }
 
       // 이미 받는 중이면 그 작업에 함께 붙는다
       if (inflight[dest]) {
@@ -131,7 +207,8 @@
             out.close(function () {
               try {
                 fs.renameSync(tmp, dest);
-                resolve({ path: dest, cached: false });
+                // 사이트가 알려준 확장자가 틀릴 수 있다 → 내용을 보고 바로잡는다
+                resolve({ path: fixExt(dest), cached: false });
               } catch (e) { reject(new Error('파일 저장 실패: ' + e.message)); }
             });
           });
@@ -191,7 +268,10 @@
     buildPath: buildPath,
     dirFor: dirFor,
     safeName: safeName,
-    exists: existsWithSize
+    exists: existsWithSize,
+    extFromUrl: extFromUrl,
+    sniffExt: sniffExt,
+    fixExt: fixExt
   };
   global.Downloader = global.Eddie.download;   // 짧은 별칭
 

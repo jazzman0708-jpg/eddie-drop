@@ -61,7 +61,32 @@
   function hasKorean(s) { return /[가-힣]/.test(s); }
 
   /**
+   * 설정에서 사용자가 만든 칩을 사전으로 쓴다.
+   * 사용자가 직접 넣은 말이니 기본 사전보다 먼저 본다.
+   */
+  function userMap() {
+    var m = {};
+    try {
+      chips().forEach(function (c) {
+        if (c && c.ko && c.en) m[String(c.ko).trim()] = String(c.en).trim();
+      });
+    } catch (e) {}
+    return m;
+  }
+
+  function lookup(word, mine) {
+    if (mine[word]) return mine[word];     // 내가 만든 칩이 우선
+    if (DICT[word]) return DICT[word];
+    return null;
+  }
+
+  /**
    * 한글 검색어를 영어로 바꾼다.
+   *
+   * 보는 순서
+   *   1. 통째로 (설정에서 만든 칩 → 기본 사전) — "카메라 셔터" 처럼 띄어쓴 말 때문
+   *   2. 단어별로
+   *
    * → { text, changed, untranslated }
    *   changed       : 하나라도 바뀌었는지
    *   untranslated  : 한글인데 사전에 없는 말이 남았는지
@@ -70,11 +95,19 @@
     q = String(q || '').trim();
     if (!q) return { text: '', changed: false, untranslated: false };
 
+    var mine = userMap();
+
+    // 1) 검색어 전체가 사전에 있으면 그것을 쓴다
+    var whole = lookup(q, mine);
+    if (whole) return { text: whole, changed: true, untranslated: false };
+
+    // 2) 단어별로 바꾼다
     var parts = q.split(/\s+/);
     var changed = false, untranslated = false;
 
     var out = parts.map(function (w) {
-      if (DICT[w]) { changed = true; return DICT[w]; }
+      var hit = lookup(w, mine);
+      if (hit) { changed = true; return hit; }
       if (hasKorean(w)) { untranslated = true; }
       return w;
     });

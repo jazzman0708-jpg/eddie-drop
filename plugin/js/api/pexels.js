@@ -77,6 +77,11 @@
     });
   }
 
+  /** 주소에서 확장자를 읽는다 (png 인 사진도 있다) */
+  function imgExt(url) {
+    return (Eddie.download && Eddie.download.extFromUrl) ? Eddie.download.extFromUrl(url, 'jpg') : 'jpg';
+  }
+
   function normalizePhoto(p) {
     var src = p.src || {};
     return {
@@ -91,11 +96,11 @@
       height: p.height,
       thumb: src.medium || src.small || src.tiny,
       files: [
-        { label: '원본', url: src.original, width: p.width, height: p.height, ext: 'jpg' },
-        { label: 'Large 2x', url: src.large2x, ext: 'jpg' },
-        { label: 'Large', url: src.large, ext: 'jpg' }
+        { label: '원본', url: src.original, width: p.width, height: p.height, ext: imgExt(src.original) },
+        { label: 'Large 2x', url: src.large2x, ext: imgExt(src.large2x) },
+        { label: 'Large', url: src.large, ext: imgExt(src.large) }
       ].filter(function (f) { return !!f.url; }),
-      ext: 'jpg'
+      ext: imgExt(src.original)
     };
   }
 
