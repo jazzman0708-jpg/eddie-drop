@@ -35,37 +35,79 @@ new CSInterface().requestOpenExtension('com.eddie.drop.panel', '');
 
 ## 폴더 구조
 
+확장은 **껍데기**만 담고, 진짜 기능은 **사용자 폴더**에 복사돼 거기서 돌아간다.
+그래서 기능을 고칠 때 설치 파일을 다시 깔 필요가 없다.
+
 ```
-eddie-drop/
-├─ CSXS/manifest.xml   패널 등록 정보
-├─ .debug              원격 디버깅 포트 8099
-├─ index.html          패널 화면
-├─ __test.html         브라우저 검사용 (배포 시 제외)
-├─ css/style.css       다크 테마
-├─ js/
-│  ├─ CSInterface.js   Adobe 공식 (CEP 12.0.0)
-│  ├─ eddie.js         전역 Eddie 객체 · 패널 ID
-│  ├─ settings.js      공유 설정 파일 읽기/쓰기
-│  ├─ net.js           Node https 요청
-│  ├─ download.js      다운로드 · 파일/썸네일 캐시
-│  ├─ cache.js         검색 결과 TTL 캐시
-│  ├─ host.js          ExtendScript 호출 다리
-│  ├─ ui.js            토스트 · 상태바 · DOM 부품
-│  ├─ premiere.js      받기 → 불러오기 → 삽입 흐름
-│  ├─ grid.js          결과 그리드
-│  ├─ api/pexels.js    · pixabay.js · giphy.js · freesound.js
-│  ├─ media-tab.js     영상 · 이미지 탭
-│  ├─ giphy-tab.js     GIF · 스티커 탭
-│  ├─ sfx-dictionary.js 효과음 한글→영어 사전 · 태그 칩
-│  ├─ sfx-tab.js       효과음 탭 (리스트 · 미리듣기)
-│  ├─ files-tab.js     내 파일 탭 (내 컴퓨터 파일 찾아보기)
-│  ├─ shortcuts.js     , . 등 키를 패널이 가져가기 (이중 실행 방지)
-│  └─ main.js          탭 · 설정 화면 · 단축키
-└─ jsx/host.jsx        프리미어 조작 (EddieDrop.core.*)
+eddie-drop/                      ← 확장 (설치 파일로 깔리는 부분, 거의 안 바뀜)
+├─ CSXS/manifest.xml             패널 등록 정보 · 버전
+├─ index.html                    껍데기 화면
+├─ shell/loader.js               사용자 폴더에서 기능을 불러오는 로더
+├─ shell/loader.css              불러오는 동안 · 실패했을 때 보이는 화면
+├─ js/CSInterface.js             Adobe 공식 (CEP 12.0.0)
+├─ jsx/boot.jsx                  프리미어 쪽 시작점 — host.jsx 를 읽어들인다
+│
+├─ plugin/                       ← 기능 (사용자 폴더로 복사되는 부분, 자주 바뀜)
+│  ├─ plugin.json                버전 · 불러올 파일 목록
+│  ├─ css/style.css              다크 테마
+│  ├─ jsx/host.jsx               프리미어 조작 (EddieDrop.core.*)
+│  └─ js/
+│     ├─ eddie.js                전역 Eddie 객체 · 패널 ID
+│     ├─ platform.js             맥/윈도우 경로 차이 흡수
+│     ├─ settings.js             공유 설정 파일 읽기/쓰기
+│     ├─ net.js                  Node https 요청
+│     ├─ download.js             다운로드 · 파일/썸네일 캐시
+│     ├─ cache.js                검색 결과 TTL 캐시
+│     ├─ host.js                 ExtendScript 호출 다리
+│     ├─ ui.js                   토스트 · 상태바 · DOM 부품
+│     ├─ audio-level.js          효과음 피크 측정 (-15dB 자동 맞추기)
+│     ├─ premiere.js             받기 → 불러오기 → 삽입 흐름
+│     ├─ shortcuts.js            , . 등 키를 패널이 가져가기
+│     ├─ updater.js              새 버전 확인 · 받기 · 교체 · 되돌리기
+│     ├─ grid.js                 결과 그리드
+│     ├─ api/pexels.js           · pixabay.js · giphy.js · freesound.js
+│     ├─ media-tab.js            영상 · 이미지 탭
+│     ├─ giphy-tab.js            GIF · 스티커 탭
+│     ├─ sfx-dictionary.js       효과음 한글→영어 사전 · 태그 칩
+│     ├─ sfx-tab.js              효과음 탭 (리스트 · 미리듣기)
+│     ├─ files-tab.js            내 파일 탭
+│     └─ main.js                 탭 · 설정 화면 · 단축키
+│
+├─ build/release.sh              배포 (버전 하나만 넣으면 끝)
+├─ build/build.sh                설치 파일 .pkg / .exe 만들기
+├─ version.json                  ← 패널이 새 버전을 확인하는 파일
+└─ 배포방법.md
+
+기능 파일이 실제로 도는 곳
+  맥   ~/Library/Application Support/Eddie/plugins/eddie-drop/
+  윈도 %APPDATA%\Eddie\plugins\eddie-drop\
 ```
 
-검색 소스를 추가하려면 `js/api/<이름>.js` 에 어댑터를 만들고
-`Sources.adapters.<이름>` 에 등록한 뒤 `index.html` 에 script 한 줄을 넣으면 된다.
+개발용 파일 (저장소·배포본에 올라가지 않음)
+- `.debug` — 원격 디버깅 포트 8099
+- `.dev` — 있으면 패널을 열 때마다 `plugin/` 을 사용자 폴더로 새로 복사한다
+  (고친 내용이 바로 보인다. **배포본에 들어가면 사용자 업데이트가 매번 지워지므로 절대 올리지 말 것**)
+- `__test.html` — 브라우저 검사용
+
+검색 소스를 추가하려면 `plugin/js/api/<이름>.js` 에 어댑터를 만들고
+`Sources.adapters.<이름>` 에 등록한 뒤 **`plugin/plugin.json` 의 `scripts` 에 한 줄** 넣으면 된다.
+(`index.html` 은 더 이상 건드리지 않는다)
+
+## 업데이트 구조
+
+```
+개발자                                사용자 패널
+  ./build/release.sh 1.2.0
+        │
+        ├─ plugin/ → zip + sha256
+        ├─ version.json 갱신 ─────────→ 시작할 때 / [업데이트 확인] 누를 때 읽음
+        └─ 깃허브 릴리스에 zip 첨부 ──→ 받아서 sha256 대조
+                                         → 지금 폴더를 .backup 으로 옮김
+                                         → 새 것으로 갈아끼움 → 새로고침
+                                         → 안 열리면 다음에 켤 때 자동 복구
+```
+
+자세한 건 [배포방법.md](배포방법.md) 참고.
 
 ## 개발 환경
 
@@ -132,10 +174,10 @@ Pixabay는 fps 정보가 없어서 적용되지 않는다고 결과 위에 안�
 넣기 전에 받은 파일의 **피크를 재서** 클립 볼륨을 목표치(**기본 -15 dB**)에 맞춘다.
 효과음마다 크기가 들쭉날쭉하지 않게 하려는 것.
 
-1. `js/audio-level.js` 가 Node `fs` 로 파일을 읽어 Web Audio `decodeAudioData` 로 디코딩
+1. `plugin/js/audio-level.js` 가 Node `fs` 로 파일을 읽어 Web Audio `decodeAudioData` 로 디코딩
 2. 전 채널 샘플을 훑어 최대 절대값 → `peakDb = 20·log10(peak)`
 3. `gainDb = 목표 - peakDb` (+15 ~ -60 으로 제한)
-4. `jsx/host.jsx` 가 넣은 클립을 찾아 볼륨 속성에 적용
+4. `plugin/jsx/host.jsx` 가 넣은 클립을 찾아 볼륨 속성에 적용
 
 **끌어놓기로 넣을 때**는 프리미어가 알아서 클립을 만들기 때문에 패널이 손댈 기회가 없다.
 그래서 `Eddie.premiere.afterDrop()` 이 나중에 클립을 찾아 뒷정리한다.
@@ -217,7 +259,7 @@ CEF(크로미움)가 그 코덱을 디코딩하지 못하기 때문이고, 패�
   각 줄에 초록색 `CC0` 배지를 표시해 눈으로도 확인된다.
 - **API 키로는 미리듣기 파일만 받을 수 있다** (`preview-hq-mp3`, 약 128kbps).
   원본(wav/flac 등)은 OAuth2 로그인이 필요하다.
-- 한글 검색: `js/sfx-dictionary.js` 의 사전으로 단어를 영어로 바꿔서 보낸다.
+- 한글 검색: `plugin/js/sfx-dictionary.js` 의 사전으로 단어를 영어로 바꿔서 보낸다.
   사전에 없는 한글이 남으면 "영어로 검색하면 결과가 더 많아요" 안내를 띄운다.
 - 태그 여러 개는 `filter=tag:a tag:b` (공백 = AND), 길이는 `duration:[0 TO 3]` 형식.
 
