@@ -67,3 +67,5 @@ desktop.ini
 *.swp
 *.log
 .claude/
+installer/app/
+installer/output/

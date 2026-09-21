@@ -1,0 +1,143 @@
+name: 윈도우 설치 파일 (Inno Setup)
+
+# 맥에서는 Inno Setup 을 돌릴 수 없어서 깃허브의 윈도우 컴퓨터가 대신 만든다.
+#
+#   · Actions 탭에서 [Run workflow] 버튼
+#   · 또는 v1.0.7 처럼 태그를 올리면 자동
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── 버전은 manifest.xml 한 곳에서만 읽는다 ──
+      - name: 버전 읽기
+        id: ver
+        shell: bash
+        run: |
+          V=$(python -c "import xml.etree.ElementTree as ET;print(ET.parse('CSXS/manifest.xml').getroot().attrib['ExtensionBundleVersion'])")
+          echo "version=$V" >> $GITHUB_OUTPUT
+          echo "Eddie Drop $V"
+
+      # ── 확장을 CEP 서명한다 (맥 없이 윈도우에서) ──
+      - name: ZXPSignCmd 받기
+        shell: bash
+        run: |
+          mkdir -p build/tools
+          curl -sSL -o build/tools/ZXPSignCmd.exe \
+            https://raw.githubusercontent.com/Adobe-CEP/CEP-Resources/master/ZXPSignCMD/4.1.3/win64/ZXPSignCmd.exe
+
+      - name: 서명 인증서 준비
+        shell: bash
+        env:
+          CERT_BASE64: ${{ secrets.CEP_CERT_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.CEP_CERT_PASSWORD }}
+        run: |
+          if [ -z "$CERT_BASE64" ]; then
+            echo "::error::CEP_CERT_BASE64 시크릿이 없습니다."
+            exit 1
+          fi
+          mkdir -p build/certs
+          echo "$CERT_BASE64" | base64 --decode > build/certs/selfsigned.p12
+          printf '%s' "$CERT_PASSWORD" > build/certs/password.txt
+
+      - name: 배포할 파일만 모으기
+        shell: bash
+        run: |
+          mkdir -p build/stage
+          # 개발용·문서는 사용자 확장 폴더에 넣지 않는다
+          rsync -a \
+            --exclude 'build' --exclude 'dist' --exclude '.git' --exclude '.github' \
+            --exclude '.gitignore' --exclude '.debug' --exclude '.dev' \
+            --exclude '__test.html' --exclude '.DS_Store' --exclude 'README.md' \
+            --exclude 'docs' --exclude 'installer' --exclude 'assets' \
+            --exclude 'version.json' --exclude '배포방법.md' --exclude '설치방법.md' \
+            ./ build/stage/
+          python build/check-payload.py build/stage/plugin "${{ steps.ver.outputs.version }}"
+
+      - name: CEP 서명
+        shell: bash
+        run: |
+          PASS=$(cat build/certs/password.txt)
+          ./build/tools/ZXPSignCmd.exe -sign build/stage "build/EddieDrop.zxp" \
+              build/certs/selfsigned.p12 "$PASS" -tsa http://timestamp.digicert.com \
+            || ./build/tools/ZXPSignCmd.exe -sign build/stage "build/EddieDrop.zxp" \
+              build/certs/selfsigned.p12 "$PASS"
+          mkdir -p installer/app
+          unzip -q build/EddieDrop.zxp -d installer/app
+          test -f installer/app/META-INF/signatures.xml || { echo "::error::서명 파일이 없습니다"; exit 1; }
+          echo "설치할 파일 $(find installer/app -type f | wc -l)개"
+
+      # ── Inno Setup 으로 설치 파일 만들기 ──
+      - name: Inno Setup 설치
+        run: choco install innosetup -y --no-progress
+
+      - name: 설치 파일 만들기
+        shell: cmd
+        run: |
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ^
+            /DMyAppVersion=${{ steps.ver.outputs.version }} ^
+            installer\EddieDrop.iss
+
+      # ── 진짜로 설치해서 확인한다 ──
+      #    확장 폴더에 없어야 할 파일이 하나라도 들어가면
+      #    프리미어가 서명이 깨진 것으로 보고 패널을 안 띄운다.
+      - name: 설치해 보고 파일 대조
+        shell: pwsh
+        run: |
+          $exe = "installer\output\EddieDrop-${{ steps.ver.outputs.version }}-Setup.exe"
+          if (-not (Test-Path $exe)) { Write-Host "::error::설치 파일이 없습니다"; exit 1 }
+
+          Start-Process $exe -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -Wait
+          Start-Sleep -Seconds 3
+
+          $ext = "$env:APPDATA\Adobe\CEP\extensions\com.eddie.drop"
+          if (-not (Test-Path $ext)) { Write-Host "::error::설치 폴더가 없습니다"; exit 1 }
+
+          $got = Get-ChildItem -Recurse -File -Force $ext |
+                 ForEach-Object { $_.FullName.Substring($ext.Length+1).Replace('\','/') } | Sort-Object
+          $want = Get-ChildItem -Recurse -File -Force installer/app |
+                  ForEach-Object { $_.FullName.Substring((Resolve-Path installer/app).Path.Length+1).Replace('\','/') } | Sort-Object
+
+          Write-Host "=== 깔린 파일 $($got.Count)개 / 있어야 할 파일 $($want.Count)개"
+          $got | ForEach-Object { Write-Host "   $_" }
+
+          $diff = Compare-Object $want $got
+          $missing = $diff | Where-Object { $_.SideIndicator -eq '<=' }
+          $extra   = $diff | Where-Object { $_.SideIndicator -eq '=>' }
+
+          if ($missing) { $missing | ForEach-Object { Write-Host "::error::빠짐: $($_.InputObject)" } }
+          if ($extra) {
+            $extra | ForEach-Object { Write-Host "::error::확장 폴더에 없어야 할 파일: $($_.InputObject)" }
+            Write-Host "::error::이 파일들 때문에 CEP 서명이 깨져 패널이 안 뜹니다."
+          }
+          if ($missing -or $extra) { exit 1 }
+          Write-Host "확장 폴더 정상 — 파일이 정확히 일치합니다"
+
+          # 제거 프로그램이 확장 폴더 밖에 있는지
+          $un = "$env:LOCALAPPDATA\Eddie Drop\uninstall"
+          if (Test-Path $un) { Write-Host "제거 프로그램 위치 정상: $un" }
+          else { Write-Host "::error::제거 프로그램을 찾지 못했습니다"; exit 1 }
+
+      - name: 결과물 올리기
+        uses: actions/upload-artifact@v4
+        with:
+          name: EddieDrop-Windows-Setup
+          path: installer/output/*.exe
+          if-no-files-found: error
+
+      # 태그로 돌린 경우에는 릴리스에도 붙인다
+      - name: 릴리스에 붙이기
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release upload "${GITHUB_REF_NAME}" installer/output/*.exe --clobber
