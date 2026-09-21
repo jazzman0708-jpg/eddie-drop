@@ -13,6 +13,9 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    # 태그로 돌 때 만든 파일을 릴리스에 붙이려면 쓰기 권한이 필요하다
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
