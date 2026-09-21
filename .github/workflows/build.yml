@@ -1,4 +1,6 @@
-name: 설치 파일 만들기
+name: 맥 설치 파일 만들기
+
+# 윈도우 설치 파일은 build-windows.yml (Inno Setup) 이 만듭니다.
 
 on:
   workflow_dispatch:          # Actions 탭에서 수동 실행
@@ -50,65 +52,7 @@ jobs:
       #     NOTARY_PROFILE: eddie-notary
       #   run: ./build/sign/mac-notarize.sh dist/*.pkg
 
-      - name: 서명된 확장 폴더 넘기기   # 윈도우 빌드가 그대로 쓴다
-        uses: actions/upload-artifact@v4
-        with:
-          name: signed-extension
-          path: build/.work/payload/
-          retention-days: 1
-
       - uses: actions/upload-artifact@v4
         with:
           name: EddieDrop-mac
           path: dist/*.pkg
-
-  # ------------------------------------------------------------------
-  # 2) 윈도우에서 .exe 를 만든다 (NSIS 가 기본 설치돼 있다)
-  # ------------------------------------------------------------------
-  win:
-    runs-on: windows-latest
-    needs: mac
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: 버전 읽기
-        id: ver
-        shell: bash
-        run: |
-          V=$(python -c "import xml.etree.ElementTree as ET;print(ET.parse('CSXS/manifest.xml').getroot().attrib['ExtensionBundleVersion'])")
-          echo "version=$V" >> $GITHUB_OUTPUT
-
-      - name: 서명된 확장 폴더 받기
-        uses: actions/download-artifact@v4
-        with:
-          name: signed-extension
-          path: payload
-
-      - name: NSIS 설치
-        run: choco install nsis -y --no-progress
-
-      - name: 윈도우 설치 파일 만들기
-        shell: cmd
-        run: |
-          mkdir dist
-          "C:\Program Files (x86)\NSIS\makensis.exe" ^
-            /DVERSION=${{ steps.ver.outputs.version }} ^
-            /DPAYLOAD=%CD%\payload\com.eddie.drop ^
-            /DOUTFILE=%CD%\dist\EddieDrop-${{ steps.ver.outputs.version }}-win.exe ^
-            build\win\installer.nsi
-
-      # 코드 서명 인증서가 있으면 주석을 푸세요 (build/sign/win-signtool.md 참고)
-      # - name: 코드 서명
-      #   shell: pwsh
-      #   env:
-      #     WIN_CERT_BASE64: ${{ secrets.WIN_CERT_BASE64 }}
-      #     WIN_CERT_PASSWORD: ${{ secrets.WIN_CERT_PASSWORD }}
-      #   run: |
-      #     [IO.File]::WriteAllBytes("cert.pfx", [Convert]::FromBase64String($env:WIN_CERT_BASE64))
-      #     & signtool sign /f cert.pfx /p $env:WIN_CERT_PASSWORD /fd SHA256 `
-      #         /tr http://timestamp.digicert.com /td SHA256 dist\*.exe
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: EddieDrop-win
-          path: dist/*.exe

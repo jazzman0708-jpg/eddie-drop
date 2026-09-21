@@ -180,39 +180,20 @@ build_mac() {
 #    설치 위치: %APPDATA%\Adobe\CEP\extensions\com.eddie.drop  (관리자 권한 불필요)
 # ------------------------------------------------------------------
 build_win() {
-  local out="$DIST/EddieDrop-$VERSION-win.exe"
-  mkdir -p "$DIST"
+  warn "윈도우 설치 파일은 이 맥에서 만들 수 없습니다 (Inno Setup 은 윈도우 전용)."
+  cat <<EOF
 
-  if ! command -v makensis >/dev/null 2>&1; then
-    warn "makensis(NSIS)가 없어 윈도우 설치 파일을 만들지 못했습니다."
-    cat <<EOF
+  깃허브가 대신 만들어 줍니다.
 
-  만드는 방법 두 가지
-    ① 이 맥에서 만들기
-         brew install makensis     # Homebrew 가 없으면 https://brew.sh 먼저 설치
-         ./build/build.sh win
-    ② GitHub Actions 로 만들기 (윈도우 러너, 설치할 것 없음)
-         .github/workflows/build.yml 이 준비돼 있습니다.
-         저장소에 올리고 Actions 탭에서 실행하면 .exe 가 나옵니다.
+    ① 태그를 올리면 자동
+         ./build/release.sh <버전>
+    ② 또는 수동으로
+         gh workflow run build-windows.yml --repo jazzman0708-jpg/eddie-drop
+
+  자세한 건 installer/README.md 를 보세요.
 
 EOF
-    return 1
-  fi
-
-  # NSIS 는 BOM 이 없으면 소스를 ANSI 로 읽어서 한글이 전부 깨진다
-  head -c 3 "$HERE/win/installer.nsi" | od -An -tx1 | tr -d ' \n' | grep -q "efbbbf" \
-    || die "installer.nsi 에 UTF-8 BOM 이 없습니다 — 설치 화면 한글이 깨집니다"
-
-  say "윈도우 설치 파일 만드는 중…"
-  makensis -NOCD \
-    "-DVERSION=$VERSION" \
-    "-DPAYLOAD=$WORK/payload/$BUNDLE_ID" \
-    "-DOUTFILE=$out" \
-    "$HERE/win/installer.nsi" >/dev/null
-
-  ok "윈도우: $(basename "$out")  ($(du -h "$out" | cut -f1))"
-  echo "   $out"
-  warn "코드 서명 인증서가 없어 SmartScreen 경고가 뜹니다 (설치방법.md 참고)"
+  return 1
 }
 
 # ------------------------------------------------------------------
