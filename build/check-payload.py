@@ -2,6 +2,14 @@
 """배포본 검사 — plugin.json 에 적힌 파일이 다 있는지, 버전이 manifest 와 같은지."""
 import json, os, sys
 
+
+# 윈도우 파이썬은 기본 출력 인코딩이 cp1252 라 한글을 못 찍는다
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+except Exception:
+    pass
+
 plugin_dir, version = sys.argv[1], sys.argv[2]
 meta = json.load(open(os.path.join(plugin_dir, 'plugin.json'), encoding='utf-8'))
 

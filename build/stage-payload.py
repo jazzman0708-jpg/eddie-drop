@@ -12,6 +12,14 @@ import os
 import shutil
 import sys
 
+
+# 윈도우 파이썬은 기본 출력 인코딩이 cp1252 라 한글을 못 찍는다
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+except Exception:
+    pass
+
 # 확장에 들어가면 안 되는 것 (폴더 이름 또는 파일 이름, 최상위 기준)
 EXCLUDE = {
     'build', 'dist', '.git', '.github', '.gitignore',
