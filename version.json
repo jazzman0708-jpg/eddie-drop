@@ -1,7 +1,7 @@
 {
-  "version": "1.0.6",
-  "date": "2026-09-19",
-  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.6/eddie-drop-plugin-1.0.6.zip",
-  "sha256": "5a58459b4b928c4cf4b9942e5c08e46b250303b208b974a1c7f0166e1d36fbb2",
-  "notes": "이미지를 가져올 때 \"헤더 오류\" 가 나던 문제를 고쳤습니다 (PNG 가 jpg 로 저장되던 문제)\n효과음 태그 칩에 직접 추가한 한글 단어로도 검색되게 고쳤습니다"
+  "version": "1.0.7",
+  "date": "2026-09-21",
+  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.7/eddie-drop-plugin-1.0.7.zip",
+  "sha256": "48cf1806192c9d0b348dc7e7fdc77787f0e4e31f9bb7a023020d07c027a2b846",
+  "notes": "윈도우 설치 파일을 Inno Setup 으로 바꿨습니다 (원본 스크립트: 타이닛 님)\n제거 프로그램이 확장 폴더 밖에 설치되도록 고쳤습니다\n패널 기능은 1.0.6 과 같습니다 — 설치 파일만 바뀐 버전입니다"
 }

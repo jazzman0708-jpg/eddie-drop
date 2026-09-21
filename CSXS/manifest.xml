@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ExtensionManifest
   ExtensionBundleId="com.eddie.drop"
-  ExtensionBundleVersion="1.0.6"
+  ExtensionBundleVersion="1.0.7"
   ExtensionBundleName="Eddie Drop"
   Version="7.0">
 
@@ -9,7 +9,7 @@
     <!-- 패널 ID는 고정입니다.
          나중에 "Eddie 대시보드" 확장이 아래 ID로 이 패널을 엽니다.
          CSInterface.requestOpenExtension("com.eddie.drop.panel", "") -->
-    <Extension Id="com.eddie.drop.panel" Version="1.0.6"/>
+    <Extension Id="com.eddie.drop.panel" Version="1.0.7"/>
   </ExtensionList>
 
   <ExecutionEnvironment>

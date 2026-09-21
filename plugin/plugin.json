@@ -1,7 +1,7 @@
 {
   "id": "eddie-drop",
   "name": "Eddie Drop",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "update": {
     "manifestUrl": "https://raw.githubusercontent.com/jazzman0708-jpg/eddie-drop/main/version.json",
     "homepage": "https://github.com/jazzman0708-jpg/eddie-drop/releases"
