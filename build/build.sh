@@ -22,13 +22,6 @@ APP_NAME="Eddie Drop"
 
 TARGET="${1:-all}"
 
-# 배포본에 넣지 않을 것들 (개발용)
-EXCLUDES=(
-  "build" "dist" ".git" ".github" ".gitignore" ".debug" ".dev" "__test.html" ".DS_Store"
-  # 개발자·배포자용 문서는 사용자 확장 폴더에 넣지 않는다
-  "README.md" "docs" "배포방법.md" "설치방법.md" "version.json"
-)
-
 say()  { printf "\033[36m▶ %s\033[0m\n" "$*"; }
 ok()   { printf "\033[32m✅ %s\033[0m\n" "$*"; }
 warn() { printf "\033[33m⚠️  %s\033[0m\n" "$*"; }
@@ -58,10 +51,9 @@ stage() {
   rm -rf "$WORK"
   mkdir -p "$WORK/stage"
 
-  local args=()
-  for e in "${EXCLUDES[@]}"; do args+=(--exclude="$e"); done
-
-  rsync -a "${args[@]}" "$ROOT/" "$WORK/stage/"
+  # 무엇을 뺄지는 build/stage-payload.py 한 곳에서만 정한다.
+  # (맥과 윈도우가 같은 규칙을 쓰게 하려는 것 — 갈라지면 사고가 난다)
+  python3 "$HERE/stage-payload.py" "$ROOT" "$WORK/stage"
 
   # macOS 확장 속성 제거.
   # 안 지우면 pkgbuild 가 파일마다 ._이름 짝꿍 파일을 만들어 설치 폴더가 지저분해진다.

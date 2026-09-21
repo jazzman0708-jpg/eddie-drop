@@ -51,15 +51,8 @@ jobs:
       - name: 배포할 파일만 모으기
         shell: bash
         run: |
-          mkdir -p build/stage
-          # 개발용·문서는 사용자 확장 폴더에 넣지 않는다
-          rsync -a \
-            --exclude 'build' --exclude 'dist' --exclude '.git' --exclude '.github' \
-            --exclude '.gitignore' --exclude '.debug' --exclude '.dev' \
-            --exclude '__test.html' --exclude '.DS_Store' --exclude 'README.md' \
-            --exclude 'docs' --exclude 'installer' --exclude 'assets' \
-            --exclude 'version.json' --exclude '배포방법.md' --exclude '설치방법.md' \
-            ./ build/stage/
+          # 무엇을 뺄지는 build/stage-payload.py 한 곳에서만 정한다
+          python build/stage-payload.py . build/stage
           python build/check-payload.py build/stage/plugin "${{ steps.ver.outputs.version }}"
 
       - name: CEP 서명
