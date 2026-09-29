@@ -1,7 +1,7 @@
 {
-  "version": "1.0.7",
-  "date": "2026-09-21",
-  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.7/eddie-drop-plugin-1.0.7.zip",
-  "sha256": "48cf1806192c9d0b348dc7e7fdc77787f0e4e31f9bb7a023020d07c027a2b846",
-  "notes": "윈도우 설치 파일을 Inno Setup 으로 바꿨습니다 (원본 스크립트: 타이닛 님)\n제거 프로그램이 확장 폴더 밖에 설치되도록 고쳤습니다\n패널 기능은 1.0.6 과 같습니다 — 설치 파일만 바뀐 버전입니다"
+  "version": "1.0.8",
+  "date": "2026-09-29",
+  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.0.8/eddie-drop-plugin-1.0.8.zip",
+  "sha256": "ed02659a09563d071fe6f596cecda043540bd52e235858173665e20c96af9593",
+  "notes": "내 파일에서 한글로 검색이 안 되던 문제를 고쳤습니다 (맥)\n하위 폴더를 3단계까지만 읽어서 일부 파일이 안 보이던 문제도 고쳤습니다 — 이제 끝까지 읽습니다\nGIF 탭 이름을 '밈' 으로 바꿨습니다\n검색창 옆 [필터 접기] 로 필터·태그 줄을 숨겨 결과를 더 많이 볼 수 있습니다"
 }
