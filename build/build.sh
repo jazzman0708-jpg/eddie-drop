@@ -171,7 +171,7 @@ build_mac() {
     say "Developer ID 서명·공증 시도 (DEVELOPER_ID 가 설정돼 있음)"
     "$HERE/sign/mac-notarize.sh" "$out"
   else
-    warn "Apple 인증서가 없어 서명하지 않았습니다 → 설치 시 경고가 뜹니다 (설치방법.md 참고)"
+    warn "Apple 인증서가 없어 서명하지 않았습니다 → 설치 시 경고가 뜹니다 (사용설명서 참고)"
   fi
 }
 

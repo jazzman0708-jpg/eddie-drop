@@ -3,7 +3,9 @@
 문서에 적힌 버전·파일 이름을 지금 버전으로 맞춘다.
 
 손으로 고치면 잊어버려서 낡은 버전이 남는다.
-(실제로 설치방법.md 가 1.0.1 인 채로 1.0.7 까지 온 적이 있다)
+(실제로 문서가 1.0.1 인 채로 1.0.7 까지 온 적이 있다)
+
+설명서는 원본 하나만 고치면 되고, 맥판·윈도우판은 make-manual.py 가 만든다.
 
   python3 build/sync-doc-versions.py 1.0.7
 """
@@ -18,18 +20,9 @@ except Exception:
     pass
 
 TARGETS = [
-    ('설치방법.md', [
+    ('docs/설명서-원본.md', [
         (r'\*\*버전 [0-9.]+\*\*', '**버전 {v}**'),
-        (r'EddieDrop-[0-9.]+-mac\.pkg', 'EddieDrop-{v}-mac.pkg'),
-        (r'EddieDrop-[0-9.]+-Setup\.exe', 'EddieDrop-{v}-Setup.exe'),
-    ]),
-    ('docs/사용설명서.md', [
-        (r'버전 \*\*[0-9.]+\*\*', '버전 **{v}**'),
-    ]),
-    ('docs/기능가이드.md', [
         (r'기준 버전 \*\*v[0-9.]+\*\*', '기준 버전 **v{v}**'),
-        (r'EddieDrop-[0-9.]+-mac\.pkg', 'EddieDrop-{v}-mac.pkg'),
-        (r'EddieDrop-[0-9.]+-Setup\.exe', 'EddieDrop-{v}-Setup.exe'),
     ]),
 ]
 

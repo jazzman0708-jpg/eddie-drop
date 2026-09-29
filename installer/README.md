@@ -65,7 +65,7 @@ iscc /DMyAppVersion=1.0.7 installer\EddieDrop.iss
 ## 코드 서명
 
 아직 인증서가 없어 **서명 없이** 만듭니다. 설치할 때 SmartScreen 경고가 뜹니다.
-넘어가는 방법은 [설치방법.md](../설치방법.md) 에 적어두었습니다.
+넘어가는 방법은 [사용설명서 (윈도우)](../docs/Eddie%20Drop%20사용설명서%20(윈도우).md) 에 적어두었습니다.
 
 인증서가 생기면 `EddieDrop.iss` 의 `[Files]` 아래 주석을 푸세요.
 

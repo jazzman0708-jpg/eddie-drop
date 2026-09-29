@@ -127,8 +127,7 @@ say "문서 맞추는 중…"
 python3 "$HERE/sync-doc-versions.py" "$VERSION"
 python3 "$HERE/make-manual.py"          # 설명서 맥판·윈도우판
 mkdir -p "$ROOT/docs/txt"
-for f in "docs/사용설명서.md" "설치방법.md" "docs/기능가이드.md" \
-         "docs/Eddie Drop 사용설명서 (맥).md" "docs/Eddie Drop 사용설명서 (윈도우).md"; do
+for f in "docs/Eddie Drop 사용설명서 (맥).md" "docs/Eddie Drop 사용설명서 (윈도우).md"; do
   [ -f "$ROOT/$f" ] && python3 "$HERE/md-to-txt.py" "$ROOT/$f" \
       "$ROOT/docs/txt/$(basename "${f%.md}").txt"
 done
