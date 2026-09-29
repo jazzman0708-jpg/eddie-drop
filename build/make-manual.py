@@ -14,6 +14,7 @@
 import io
 import os
 import re
+import subprocess
 import sys
 import unicodedata
 import xml.etree.ElementTree as ET
@@ -78,11 +79,22 @@ def main():
     v = version()
     src = io.open(SRC, encoding='utf-8').read()
 
+    # 맥은 md 로, 윈도우는 메모장에서 바로 열리는 txt 로 낸다.
+    # (윈도우 사용자는 md 를 열 프로그램이 없는 경우가 많다)
     for key, prof in PROFILES.items():
         name = 'Eddie Drop 사용설명서 (%s)' % prof['이름']
         md = os.path.join(OUT, name + '.md')
         io.open(md, 'w', encoding='utf-8').write(build(src, key, v))
-        print('   %s.md' % name)
+
+        if key == 'win':
+            txt = os.path.join(OUT, name + '.txt')
+            subprocess.check_call([sys.executable,
+                                   os.path.join(ROOT, 'build', 'md-to-txt.py'), md, txt],
+                                  stdout=subprocess.DEVNULL)
+            os.remove(md)                       # 윈도우는 txt 만 남긴다
+            print('   %s.txt' % name)
+        else:
+            print('   %s.md' % name)
 
     print('   버전 v%s' % v)
 
