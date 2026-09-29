@@ -69,7 +69,7 @@
     var bar = el('div', 'searchbar');
 
     // --- 검색창 ---
-    var row = el('div', 'row');
+    var row = el('div', 'row keep')   // 좁혀도 검색창은 남는다;
     this.input = el('input', 'grow');
     this.input.type = 'text';
     this.input.spellcheck = false;
@@ -85,7 +85,6 @@
       self.timer = setTimeout(function () { self.search(true); }, 700);
     });
     row.appendChild(this.input);
-      row.appendChild(Eddie.ui.leanToggle(view, 'sfx'));
     row.appendChild(ui.button('btn primary', '검색', function () {
       clearTimeout(self.timer);
       self.search(true);
@@ -152,6 +151,7 @@
       '클릭 = 듣기 · <b>Tab</b> 다음 · <b>Shift+Tab</b> 이전 · <b>Space</b> 재생/정지 · <b>,</b> 삽입 · <b>.</b> 덮어쓰기'));
 
     view.appendChild(bar);
+      view.appendChild(Eddie.ui.splitter(bar, 'sfx'));
 
     // --- 결과 리스트 ---
     this.list = el('div', 'sfx-list');

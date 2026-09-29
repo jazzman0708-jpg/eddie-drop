@@ -864,27 +864,52 @@ label.check.mini input[type=checkbox]{ width:12px; height:12px; }
   user-select:text;
 }
 
-/* ---------- 필터 접기 ---------- */
-/* 한 번 맞춰두고 잘 안 바꾸는 줄을 숨겨서 결과를 더 많이 보이게 한다 */
-.lean-btn{
+/* ---------- 검색 영역 / 결과 영역 경계선 ---------- */
+/* 위아래로 끌면 검색·필터 영역의 높이가 바뀐다 */
+.searchbar{
+  overflow:hidden auto;          /* 좁히면 필터 줄이 스크롤된다 */
+  scrollbar-width:thin;
+}
+.searchbar.shrunk{ padding-bottom:4px; }
+
+.splitter{
   flex:0 0 auto;
-  font-size:10.5px;
-  padding:4px 8px;
-  color:var(--text-dim);
-  white-space:nowrap;
+  height:11px;
+  background:var(--bg-2);
+  border-bottom:1px solid var(--line);
+  cursor:row-resize;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  user-select:none;
 }
-.lean-btn:hover{ color:var(--text); }
+.splitter:hover{ background:var(--bg-3); }
+.splitter:hover .grip{ background:var(--accent); }
 
-.view.lean .filters,
-.view.lean .filterbox,
-.view.lean .filter-checks,
-.view.lean .chips,
-.view.lean .size-row,
-.view.lean .vol-row,
-.view.lean .howto,
-.view.lean .sfx-foot{
-  display:none !important;
+.splitter .grip{
+  display:block;
+  width:46px;
+  height:3px;
+  border-radius:3px;
+  background:var(--line-2);
+  transition:background .12s;
 }
 
-/* 접었을 때는 검색줄도 조금 더 붙인다 */
-.view.lean .searchbar{ padding-bottom:6px; gap:6px; }
+/* 끄는 동안에는 글자가 선택되지 않게 */
+body.splitting, body.splitting *{
+  cursor:row-resize !important;
+  user-select:none !important;
+}
+
+/* 검색 영역을 좁혀도 검색창 줄은 위에 남아 있게 */
+.searchbar .row.keep{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:var(--bg-2);
+  padding-top:2px;
+  margin-bottom:8px;
+}
+.searchbar.shrunk .row.keep{
+  box-shadow:0 6px 8px -6px #0008;
+}

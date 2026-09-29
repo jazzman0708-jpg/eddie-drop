@@ -134,7 +134,7 @@
     bar.appendChild(this.favBox);
 
     // --- 검색 + 필터 ---
-    var row = el('div', 'row');
+    var row = el('div', 'row keep')   // 좁혀도 검색창은 남는다;
     this.input = el('input', 'grow');
     this.input.type = 'text';
     this.input.spellcheck = false;
@@ -144,7 +144,6 @@
       self.timer = setTimeout(function () { self.query = self.input.value.trim(); self.render(); }, 250);
     });
     row.appendChild(this.input);
-      row.appendChild(Eddie.ui.leanToggle(view, 'files'));
     bar.appendChild(row);
 
     var f = el('div', 'filters');
@@ -202,6 +201,7 @@
     bar.appendChild(sz);
 
     view.appendChild(bar);
+      view.appendChild(Eddie.ui.splitter(bar, 'files'));
 
     // --- 결과 ---
     var results = el('div');

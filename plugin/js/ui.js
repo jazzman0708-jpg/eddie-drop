@@ -46,33 +46,75 @@
   }
 
   /**
-   * 검색줄 오른쪽에 붙는 [필터] 접기 버튼.
+   * 검색 영역과 결과 영역 사이의 경계선.
    *
-   * 필터·빠른 태그·수위·썸네일 크기처럼 한 번 맞춰두고 잘 안 바꾸는 줄을
-   * 접어서 검색 결과를 더 많이 보이게 한다.
-   * 접은 상태는 탭마다 따로 기억한다.
+   * 위아래로 끌면 검색·필터 영역의 높이가 바뀐다.
+   * 위로 끝까지 올리면 검색창만 남고 결과가 가장 넓어진다.
+   * 두 번 클릭하면 "가장 좁게 ↔ 원래대로" 를 오간다.
+   * 탭마다 따로 기억한다.
    */
-  function leanToggle(view, key) {
-    var on = false;
-    try { on = localStorage.getItem('eddieDrop.lean.' + key) === '1'; } catch (e) {}
-    view.classList.toggle('lean', on);
+  function splitter(bar, key) {
+    var MIN = 46;                       // 검색창 한 줄만 남는 높이
+    var store = 'eddieDrop.split.' + key;
 
-    var b = el('button', 'btn small lean-btn');
+    // 검색창 줄을 맨 위로 올린다.
+    // 좁혔을 때 남는 자리에 가장 자주 쓰는 검색창이 보이게 하려는 것.
+    var keep = bar.querySelector('.row.keep');
+    if (keep && bar.firstChild !== keep) bar.insertBefore(keep, bar.firstChild);
 
-    function paint() {
-      b.innerHTML = on ? '필터 펼치기 ▾' : '필터 접기 ▴';
-      b.title = on ? '필터·태그 줄을 다시 보여줍니다' : '필터·태그 줄을 숨겨 결과를 더 많이 봅니다';
+    var el2 = el('div', 'splitter');
+    el2.title = '위아래로 끌어서 검색창 높이를 조절할 수 있어요 (두 번 클릭하면 되돌아갑니다)';
+    el2.appendChild(el('span', 'grip'));
+
+    function full() {
+      // 내용 전체가 보이는 높이
+      var h = bar.scrollHeight;
+      return h > MIN ? h : MIN;
     }
 
-    b.addEventListener('click', function () {
-      on = !on;
-      view.classList.toggle('lean', on);
-      try { localStorage.setItem('eddieDrop.lean.' + key, on ? '1' : '0'); } catch (e) {}
-      paint();
+    function apply(h, save) {
+      h = Math.max(MIN, Math.min(h, full()));
+      bar.style.height = h + 'px';
+      bar.classList.toggle('shrunk', h < full() - 2);
+      if (save) { try { localStorage.setItem(store, String(Math.round(h))); } catch (e) {} }
+    }
+
+    // 기억해 둔 높이로 시작한다
+    setTimeout(function () {
+      var saved = null;
+      try { saved = localStorage.getItem(store); } catch (e) {}
+      if (saved) apply(parseInt(saved, 10), false);
+    }, 0);
+
+    var dragging = false, startY = 0, startH = 0;
+
+    el2.addEventListener('mousedown', function (e) {
+      dragging = true;
+      startY = e.clientY;
+      startH = bar.getBoundingClientRect().height;
+      document.body.classList.add('splitting');
+      e.preventDefault();
     });
 
-    paint();
-    return b;
+    document.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      apply(startH + (e.clientY - startY), false);
+    });
+
+    document.addEventListener('mouseup', function () {
+      if (!dragging) return;
+      dragging = false;
+      document.body.classList.remove('splitting');
+      apply(bar.getBoundingClientRect().height, true);
+    });
+
+    // 두 번 클릭 = 가장 좁게 ↔ 원래대로
+    el2.addEventListener('dblclick', function () {
+      var now = bar.getBoundingClientRect().height;
+      apply(now > MIN + 4 ? MIN : full(), true);
+    });
+
+    return el2;
   }
 
   var toastTimer = null;
@@ -238,7 +280,7 @@
   function fmtMB(bytes) { return (bytes / 1048576).toFixed(1) + 'MB'; }
 
   global.Eddie.ui = {
-    leanToggle: leanToggle,
+    splitter: splitter,
     $: $, $$: $$,
     el: el,
     select: select,
