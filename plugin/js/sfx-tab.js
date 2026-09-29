@@ -85,6 +85,7 @@
       self.timer = setTimeout(function () { self.search(true); }, 700);
     });
     row.appendChild(this.input);
+      row.appendChild(Eddie.ui.leanToggle(view, 'sfx'));
     row.appendChild(ui.button('btn primary', '검색', function () {
       clearTimeout(self.timer);
       self.search(true);

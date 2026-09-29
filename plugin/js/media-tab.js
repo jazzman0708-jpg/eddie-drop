@@ -186,6 +186,7 @@
       self.timer = setTimeout(function () { self.search(true); }, 700);   // API 한도 절약
     });
     row.appendChild(this.input);
+      row.appendChild(Eddie.ui.leanToggle(view, 'media-' + this.kind));
     row.appendChild(ui.button('btn primary', '검색', function () {
       clearTimeout(self.timer);
       self.search(true);

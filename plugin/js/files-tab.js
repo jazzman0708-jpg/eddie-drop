@@ -36,7 +36,12 @@
   // 종류순으로 묶을 때의 차례
   var KIND_ORDER = { video: 1, image: 2, audio: 3 };
 
-  var MAX_FILES = 400;          // 한 폴더에 너무 많으면 앞에서 자른다
+  // 하위 폴더까지 켜면 효과음 모음 같은 곳은 400개를 금방 넘긴다.
+  // 앞에서 잘리면 뒤쪽 파일은 검색해도 안 나오므로 넉넉히 잡는다.
+  var MAX_FILES = 50000;
+
+  // 한 번 읽은 폴더를 기억해 둔다 (다시 들어오면 바로 보여주려고)
+  var CACHE = {};
 
   // 효과음 미리듣기 (한 번에 하나만)
   var player = null;
@@ -111,7 +116,8 @@
     this.pathBox = el('div', 'grow folder-path');
     this.pathBox.title = '지금 보고 있는 폴더';
     frow.appendChild(this.pathBox);
-    frow.appendChild(ui.button('btn', '새로고침', function () { self.load(); }));
+    // 기억해 둔 목록을 버리고 폴더를 다시 읽는다
+      frow.appendChild(ui.button('btn', '새로고침', function () { self.load(true); }));
     bar.appendChild(frow);
 
     // --- 폴더 단위로 한 번에 불러오기 ---
@@ -138,6 +144,7 @@
       self.timer = setTimeout(function () { self.query = self.input.value.trim(); self.render(); }, 250);
     });
     row.appendChild(this.input);
+      row.appendChild(Eddie.ui.leanToggle(view, 'files'));
     bar.appendChild(row);
 
     var f = el('div', 'filters');
@@ -307,7 +314,18 @@
   };
 
   // ---------------- 읽기 ----------------
-  FilesTab.prototype.load = function () {
+  /**
+   * 폴더를 훑어서 파일 목록을 만든다.
+   *
+   * 프리미어 프로젝트 패널처럼 "한 번 읽어두고 그 목록에서 찾는" 방식이다.
+   * 예전에는 3단계 아래까지만 훑어서, 더 깊은 곳에 있는 파일은
+   * 검색해도 영영 안 나왔다. (실제 소스 폴더에서 15%가 빠졌다)
+   *
+   * 이제 끝까지 훑는다. 대신 아주 큰 폴더에서 패널이 멈추지 않도록
+   * 조금씩 나눠 읽고, 읽는 동안 몇 개까지 읽었는지 보여준다.
+   * 한 번 읽은 폴더는 기억해 두었다가 다시 들어오면 바로 보여준다.
+   */
+  FilesTab.prototype.load = function (force) {
     var self = this;
 
     if (!fs || !path) { this.grid.message('이 환경에서는 파일을 읽을 수 없습니다.'); return; }
@@ -316,46 +334,85 @@
     this.pathBox.textContent = Eddie.ui.prettyName(this.dir);
     this.upBtn.disabled = (path.dirname(this.dir) === this.dir);
     this.renderFavs();
+
+    // 이미 읽어둔 폴더면 바로 보여준다
+    var key = this.dir + '|' + (this.deep ? 'deep' : 'flat');
+    if (!force && CACHE[key]) {
+      this.entries = CACHE[key].entries;
+      this.truncated = CACHE[key].truncated;
+      this.render();
+      return;
+    }
+
+    this.scanId = (this.scanId || 0) + 1;
+    var myScan = this.scanId;
+
+    var out = [];
+    var truncated = false;
+    var queue = [{ dir: this.dir, depth: 0 }];
+
     this.grid.message('폴더를 읽는 중…');
 
-    setTimeout(function () {
-      var out = [];
-      var truncated = false;
+    function step() {
+      if (self.scanId !== myScan) return;              // 그 사이 다른 폴더로 옮겼다
 
-      function scan(dir, depth) {
+      var until = Date.now() + 40;                     // 한 번에 40ms 만 일한다
+      while (queue.length && Date.now() < until) {
+        var job = queue.shift();
         var names;
-        try { names = fs.readdirSync(dir); }
-        catch (e) { return; }
+        try { names = fs.readdirSync(job.dir); }
+        catch (e) { continue; }
 
-        names.forEach(function (name) {
-          if (out.length >= MAX_FILES) { truncated = true; return; }
-          if (name.charAt(0) === '.') return;
-          var full = path.join(dir, name);
+        for (var i = 0; i < names.length; i++) {
+          if (out.length >= MAX_FILES) { truncated = true; queue.length = 0; break; }
+
+          var name = names[i];
+          if (name.charAt(0) === '.') continue;
+
+          var full = path.join(job.dir, name);
           var st;
-          try { st = fs.statSync(full); } catch (e) { return; }
+          try { st = fs.statSync(full); } catch (e) { continue; }
+
+          // 맥은 파일 이름을 "ㄷ ㅡ ㅇ" 처럼 쪼개서(NFD) 돌려준다.
+          // 키보드로 친 검색어는 합쳐진 형태(NFC)라 그대로 비교하면 영영 안 맞는다.
+          // 이름만 NFC 로 맞추고, 경로(full)는 파일을 열어야 하므로 원본 그대로 둔다.
+          var shown = Eddie.ui.prettyName(name);
 
           if (st.isDirectory()) {
-            if (depth === 0) out.push({ isDir: true, name: name, fullPath: full, mtime: st.mtimeMs, size: 0 });
-            if (self.deep && depth < 3) scan(full, depth + 1);
-            return;
+            if (job.depth === 0) {
+              out.push({ isDir: true, name: shown, fullPath: full, mtime: st.mtimeMs, size: 0 });
+            }
+            if (self.deep) queue.push({ dir: full, depth: job.depth + 1 });   // 깊이 제한 없음
+            continue;
           }
+
           var k = kindOfFile(name);
-          if (!k) return;
-          out.push({ isDir: false, name: name, fullPath: full, kind: k, size: st.size, mtime: st.mtimeMs });
-        });
+          if (!k) continue;
+          out.push({ isDir: false, name: shown, fullPath: full, kind: k,
+                     size: st.size, mtime: st.mtimeMs });
+        }
       }
 
-      scan(self.dir, 0);
+      if (queue.length) {
+        self.grid.message('폴더를 읽는 중… ' + out.length + '개');
+        setTimeout(step, 0);                            // 화면이 멈추지 않게 잠깐 넘겨준다
+        return;
+      }
+
       self.entries = out;
       self.truncated = truncated;
+      CACHE[key] = { entries: out, truncated: truncated };
       self.render();
-    }, 10);
+    }
+
+    setTimeout(step, 10);
   };
 
   // ---------------- 그리기 ----------------
   FilesTab.prototype.render = function () {
     var self = this;
-    var q = this.query.toLowerCase();
+      // 검색어도 같은 형태로 맞춘다 (붙여넣기로 자소분리된 글이 올 수 있다)
+      var q = Eddie.ui.prettyName(this.query).toLowerCase();
 
     var list = this.entries.filter(function (e) {
       if (e.isDir) return !q;                              // 검색 중에는 폴더를 숨긴다
@@ -395,7 +452,7 @@
     }
 
     this.grid.add('files', list.map(function (e) { return self.toItem(e); }), true);
-    this.grid.setCount('files', list.length + '개' + (this.truncated ? ' (' + MAX_FILES + '개까지만)' : ''));
+    this.grid.setCount('files', list.length + '개' + (this.truncated ? ' · ' + MAX_FILES + '개까지만 읽었어요' : ''));
     if (this.grid.selected < 0) this.grid.select(0);
   };
 

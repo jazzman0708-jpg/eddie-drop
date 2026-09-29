@@ -59,7 +59,7 @@
     this.input = el('input', 'grow');
     this.input.type = 'text';
     this.input.spellcheck = false;
-    this.input.placeholder = isSticker ? '스티커 검색 (예: 하트, fire)' : 'GIF 검색 (예: 웃음, applause)';
+    this.input.placeholder = isSticker ? '스티커 검색 (예: 하트, fire)' : '밈 검색 (예: 웃음, applause)';
     this.input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
         clearTimeout(self.timer);
@@ -71,6 +71,7 @@
       self.timer = setTimeout(function () { self.search(true); }, 700);
     });
     row.appendChild(this.input);
+      row.appendChild(Eddie.ui.leanToggle(view, 'giphy-' + this.kind));
     row.appendChild(ui.button('btn primary', '검색', function () {
       clearTimeout(self.timer);
       self.search(true);
@@ -253,7 +254,7 @@
         self.search(false);
       } : null);
 
-      Eddie.ui.status((self.kind === 'sticker' ? '스티커' : 'GIF') + ' ' + shown + '개', 'ok');
+      Eddie.ui.status((self.kind === 'sticker' ? '스티커' : '밈') + ' ' + shown + '개', 'ok');
 
     }).catch(function (e) {
       self.busy = false;

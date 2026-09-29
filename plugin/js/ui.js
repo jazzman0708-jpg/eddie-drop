@@ -45,6 +45,36 @@
     return a;
   }
 
+  /**
+   * 검색줄 오른쪽에 붙는 [필터] 접기 버튼.
+   *
+   * 필터·빠른 태그·수위·썸네일 크기처럼 한 번 맞춰두고 잘 안 바꾸는 줄을
+   * 접어서 검색 결과를 더 많이 보이게 한다.
+   * 접은 상태는 탭마다 따로 기억한다.
+   */
+  function leanToggle(view, key) {
+    var on = false;
+    try { on = localStorage.getItem('eddieDrop.lean.' + key) === '1'; } catch (e) {}
+    view.classList.toggle('lean', on);
+
+    var b = el('button', 'btn small lean-btn');
+
+    function paint() {
+      b.innerHTML = on ? '필터 펼치기 ▾' : '필터 접기 ▴';
+      b.title = on ? '필터·태그 줄을 다시 보여줍니다' : '필터·태그 줄을 숨겨 결과를 더 많이 봅니다';
+    }
+
+    b.addEventListener('click', function () {
+      on = !on;
+      view.classList.toggle('lean', on);
+      try { localStorage.setItem('eddieDrop.lean.' + key, on ? '1' : '0'); } catch (e) {}
+      paint();
+    });
+
+    paint();
+    return b;
+  }
+
   var toastTimer = null;
   function toast(msg) {
     var t = $('#toast');
@@ -208,6 +238,7 @@
   function fmtMB(bytes) { return (bytes / 1048576).toFixed(1) + 'MB'; }
 
   global.Eddie.ui = {
+    leanToggle: leanToggle,
     $: $, $$: $$,
     el: el,
     select: select,

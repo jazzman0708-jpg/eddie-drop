@@ -12,7 +12,7 @@
   var TABS = [
     { id: 'video',   label: '영상',   make: function () { return new Sources.MediaTab('video'); } },
     { id: 'image',   label: '이미지', make: function () { return new Sources.MediaTab('image'); } },
-    { id: 'gif',     label: 'GIF',    make: function () { return new Sources.GiphyTab('gif'); } },
+    { id: 'gif',     label: '밈',     make: function () { return new Sources.GiphyTab('gif'); } },
     { id: 'sticker', label: '스티커', make: function () { return new Sources.GiphyTab('sticker'); } },
     { id: 'sfx',     label: '효과음', make: function () { return new Sources.SfxTab(); } },
     { id: 'files',   label: '내 파일', make: function () { return new Sources.FilesTab(); } }

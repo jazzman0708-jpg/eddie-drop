@@ -863,3 +863,28 @@ label.check.mini input[type=checkbox]{ width:12px; height:12px; }
   -webkit-user-select:text;
   user-select:text;
 }
+
+/* ---------- 필터 접기 ---------- */
+/* 한 번 맞춰두고 잘 안 바꾸는 줄을 숨겨서 결과를 더 많이 보이게 한다 */
+.lean-btn{
+  flex:0 0 auto;
+  font-size:10.5px;
+  padding:4px 8px;
+  color:var(--text-dim);
+  white-space:nowrap;
+}
+.lean-btn:hover{ color:var(--text); }
+
+.view.lean .filters,
+.view.lean .filterbox,
+.view.lean .filter-checks,
+.view.lean .chips,
+.view.lean .size-row,
+.view.lean .vol-row,
+.view.lean .howto,
+.view.lean .sfx-foot{
+  display:none !important;
+}
+
+/* 접었을 때는 검색줄도 조금 더 붙인다 */
+.view.lean .searchbar{ padding-bottom:6px; gap:6px; }
