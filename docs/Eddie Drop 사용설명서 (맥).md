@@ -5,7 +5,7 @@
 
 브라우저와 파일 탐색기를 오갈 필요 없이, 프리미어 안에서 다 끝납니다.
 
-**버전 1.0.9**
+**버전 1.0.10**
 
 ---
 
@@ -29,7 +29,7 @@
 
 https://github.com/jazzman0708-jpg/eddie-drop/releases/latest
 
-받을 파일: **EddieDrop-1.0.9-mac.pkg**
+받을 파일: **EddieDrop-1.0.10-mac.pkg**
 
 ## 설치하기 전에
 
