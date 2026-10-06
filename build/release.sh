@@ -153,6 +153,11 @@ URL="https://github.com/$OWNER/$REPO/releases/download/v$VERSION/$(basename "$ZI
 NOTES="$NOTES" URL="$URL" SHA="$SHA" VERSION="$VERSION" MIN="$MIN" \
 INSTALLER="$INSTALLER" OWNER="$OWNER" REPO="$REPO" python3 - <<'PY'
 import os, io, json, collections, datetime
+# 다른 에디 플러그인 칸("eddie-pad" 등)은 그대로 옮겨 적는다 — 지우면 그 플러그인이 새 버전을 못 찾는다
+try:
+    prev = json.load(io.open('version.json', encoding='utf-8'), object_pairs_hook=collections.OrderedDict)
+except Exception:
+    prev = {}
 d = collections.OrderedDict()
 d['version'] = os.environ['VERSION']
 d['date'] = datetime.date.today().isoformat()
@@ -164,6 +169,9 @@ if os.environ.get('MIN'):
 if os.environ['INSTALLER'] == 'true':
     d['requiresInstaller'] = True
     d['installerPage'] = 'https://github.com/%s/%s/releases/latest' % (os.environ['OWNER'], os.environ['REPO'])
+for k, v in prev.items():
+    if isinstance(v, dict) and k not in d:
+        d[k] = v
 io.open('version.json', 'w', encoding='utf-8').write(json.dumps(d, indent=2, ensure_ascii=False) + '\n')
 PY
 cat version.json | sed 's/^/   /'
@@ -175,7 +183,8 @@ if [ "$DRY" = "1" ]; then
   # 연습이므로 고쳐놓은 버전 번호를 되돌린다.
   # (안 되돌리면 진짜로 배포할 때 "이미 그 버전" 이라며 막힌다)
   git checkout -- CSXS/manifest.xml plugin/plugin.json 2>/dev/null || true
-  rm -f version.json
+  # version.json 도 되돌린다 (지우면 "eddie-pad" 칸까지 사라진다)
+  git checkout -- version.json 2>/dev/null || true
   warn "--dry-run 이라 여기서 멈춥니다."
   echo "   깃허브에 아무것도 올리지 않았고, 버전 번호도 v$CUR 그대로 되돌렸습니다."
   echo "   만들어본 파일: $(basename "$ZIP")"

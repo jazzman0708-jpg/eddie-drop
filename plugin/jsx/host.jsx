@@ -143,6 +143,31 @@ EddieDrop.util = {
      * 하나만 찾는 findByMediaPath 로는 부족하다.
      * → [{ item, parent }]
      */
+    /**
+     * 프리미어가 멋대로 바꾼 픽셀 비율을 원본대로(정사각형) 되돌린다.
+     *
+     * 프리미어는 해상도가 어중간한 파일을 보면
+     * "이건 비정방형 픽셀이겠구나" 하고 혼자 추측해서 픽셀 비율을 바꾼다.
+     * 그러면 화면에서 가로로 늘어나 찌그러져 보인다.
+     * (실제로 GIPHY 밈이 1.28 ~ 1.78 배로 늘어나 있었다)
+     *
+     * 우리가 받는 파일은 전부 정사각형 픽셀이므로 1.0 으로 돌려놓는다.
+     * → 바꿨으면 true
+     */
+    fixPixelAspect: function (item) {
+        try {
+            var fi = item.getFootageInterpretation();
+            if (!fi) return false;
+            var par = fi.pixelAspectRatio;
+            if (par && Math.abs(par - 1) > 0.001) {
+                fi.pixelAspectRatio = 1;
+                item.setFootageInterpretation(fi);
+                return true;
+            }
+        } catch (e) {}
+        return false;
+    },
+
     findAllByMediaPath: function (target) {
         var out = [];
         function walk(root) {
@@ -315,6 +340,7 @@ EddieDrop.core = {
             if (existing) {
                 var info = EddieDrop.util.itemInfo(existing);
                 info.reused = true;
+                info.aspectFixed = EddieDrop.util.fixPixelAspect(existing);
                 return EddieDrop.ok(info);
             }
 
@@ -328,6 +354,7 @@ EddieDrop.core = {
 
             var out = EddieDrop.util.itemInfo(item);
             out.reused = false;
+            out.aspectFixed = EddieDrop.util.fixPixelAspect(item);
             return EddieDrop.ok(out);
         } catch (e) { return EddieDrop.fail(e.toString()); }
     },
@@ -353,6 +380,12 @@ EddieDrop.core = {
             }
 
             if (todo.length) app.project.importFiles(todo, true, bin, false);
+
+            // 프리미어가 바꿔놓은 픽셀 비율을 원본대로 되돌린다
+            for (var f = 0; f < todo.length; f++) {
+                var got = EddieDrop.util.findByMediaPath(todo[f]);
+                if (got) EddieDrop.util.fixPixelAspect(got);
+            }
 
             return EddieDrop.ok({ added: todo.length, skipped: skipped, bin: bin.name });
         } catch (e) { return EddieDrop.fail(e.toString()); }
