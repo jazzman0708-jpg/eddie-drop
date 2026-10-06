@@ -15,6 +15,7 @@
     { id: 'gif',     label: '밈',     make: function () { return new Sources.GiphyTab('gif'); } },
     { id: 'sticker', label: '스티커', make: function () { return new Sources.GiphyTab('sticker'); } },
     { id: 'sfx',     label: '효과음', make: function () { return new Sources.SfxTab(); } },
+    { id: 'emoji',   label: '이모지', make: function () { return new Sources.EmojiTab(); } },
     { id: 'files',   label: '내 파일', make: function () { return new Sources.FilesTab(); } }
   ];
 

@@ -28,10 +28,12 @@
     "js/api/pixabay.js",
     "js/api/giphy.js",
     "js/api/freesound.js",
+    "js/emoji-data.js",
     "js/sfx-dictionary.js",
     "js/media-tab.js",
     "js/giphy-tab.js",
     "js/sfx-tab.js",
+    "js/emoji-tab.js",
     "js/files-tab.js",
     "js/main.js"
   ]

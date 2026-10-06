@@ -141,12 +141,21 @@
     var thumb = el('div', 'thumb ' + tile + (item.alpha ? ' alpha' : '') + extra +
                   ' type-' + (item.type || 'file'));
 
+    // 이모지는 받아올 그림이 없다. 글자를 크게 그려서 보여준다.
+    if (item.type === 'emoji') {
+        var face = el('div', 'emoji-face');
+        face.textContent = item.emoji;
+        face.style.fontFamily = '"EddieNotoEmoji"';   // 구글 이모지로만 그린다
+        thumb.appendChild(face);
+        thumb.classList.add('emoji-tile');
+    }
+
     var img = el('img');
     img.draggable = false;
     if (item.fit) img.style.objectFit = item.fit;
     img.loading = 'lazy';
     img.alt = '';
-    thumb.appendChild(img);
+    if (item.type !== 'emoji') thumb.appendChild(img);
 
     // 미리보기를 못 만드는 형식(ProRes .mov, .heic 등)은
     // 검은 칸 대신 확장자를 크게 보여준다
@@ -168,7 +177,8 @@
     } else {
       // 보여줄 그림이 없으면 아예 두지 않는다 (빈 src 는 "깨진 이미지" 로 보인다)
       img.style.display = 'none';
-      if (item.type !== 'folder' && !item.previewVideo) noPreview();
+      // 이모지는 글자를 직접 그리므로 "미리보기 없음" 표시가 필요 없다
+      if (item.type !== 'folder' && item.type !== 'emoji' && !item.previewVideo) noPreview();
     }
 
     // 영상: 마우스 올리면 저화질로 미리보기

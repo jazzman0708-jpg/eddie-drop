@@ -913,3 +913,33 @@ body.splitting, body.splitting *{
 .searchbar.shrunk .row.keep{
   box-shadow:0 6px 8px -6px #0008;
 }
+
+/* ---------- 이모지 탭 ---------- */
+/* 피부톤 고르기 */
+.tone-row{ gap:4px; align-items:center; }
+.tone{
+  width:30px; height:30px; padding:0;
+  font-size:17px; line-height:1;
+  background:var(--bg-3); border:1px solid var(--line);
+  border-radius:6px; cursor:pointer;
+}
+.tone:hover{ border-color:var(--line-2); }
+.tone.active{ border-color:var(--accent); background:#2e2a28; }
+
+/* 이모지 카드 — 글자를 크게 보여준다 */
+.card .emoji-face{
+  width:100%; aspect-ratio:1/1;
+  display:flex; align-items:center; justify-content:center;
+  font-size:calc(var(--card, 96px) * 0.52); line-height:1;
+  background:
+    linear-gradient(45deg,#2a2a2a 25%,transparent 25%,transparent 75%,#2a2a2a 75%),
+    linear-gradient(45deg,#2a2a2a 25%,#232323 25%,#232323 75%,#2a2a2a 75%);
+  background-size:14px 14px;
+  background-position:0 0,7px 7px;     /* 투명 배경 표시 */
+  border-radius:var(--radius);
+  user-select:none;
+}
+.results.list-mode .card .emoji-face{
+  width:34px; height:34px; aspect-ratio:auto;
+  font-size:22px; flex:0 0 auto;
+}
