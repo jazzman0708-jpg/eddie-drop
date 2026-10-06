@@ -230,6 +230,19 @@
     thumb.appendChild(badges);
 
     // 폴더처럼 그림이 없는 카드는 이름을 타일 위에 크게 보여준다
+    // 폴더 트리: 깊이만큼 들여쓰고, 펼쳤는지 화살표로 보여준다
+    if (item.depth) card.style.setProperty("--depth", item.depth);
+    if (item.type === 'folder') {
+        // 펼칠 수 있는 폴더일 때만 트리 모양으로 꾸민다
+        card.classList.toggle('tree-folder', !!item.tree);
+        card.classList.toggle('open', !!item.open);
+        // 펼칠 수 없는 폴더(빈 폴더 · 폴더 열어서 보기)는 화살표를 붙이지 않는다
+        if (item.tree) {
+            var arrow = el('span', 'tree-arrow', item.open ? '▾' : '▸');
+            card.appendChild(arrow);
+        }
+    }
+
     if (item.overlayName) {
       var nameTag = el('span', 'tile-name', '');
       nameTag.textContent = item.overlayName;

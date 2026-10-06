@@ -607,7 +607,8 @@ select.off{
 }
 .filter-checks{
   display:flex;
-  gap:14px;
+  flex-wrap:wrap;          /* 패널을 좁혀도 체크박스가 잘리지 않게 */
+  gap:6px 14px;
   margin-bottom:8px;
 }
 label.check.mini{
@@ -772,7 +773,9 @@ label.check.mini input[type=checkbox]{ width:12px; height:12px; }
 .results.list-mode .thumb.type-video::before   { content:'▶'; color:#6c8cff; }
 .results.list-mode .thumb.type-image::before   { content:'▣'; color:#54c98a; }
 .results.list-mode .thumb.type-audio::before   { content:'♪'; color:#e0b341; font-size:15px; }
-.results.list-mode .thumb.type-folder::before  { content:'▸'; color:var(--text-dim); font-size:15px; }
+.results.list-mode .thumb.type-folder::before  { content:'📁'; font-size:12px; }
+/* 왼쪽에 펼침 화살표가 있으면 폴더 그림은 겹치니 뺀다 */
+.results.list-mode .card.tree-folder .thumb.type-folder::before{ content:''; }
 .results.list-mode .thumb.type-gif::before,
 .results.list-mode .thumb.type-sticker::before { content:'✦'; color:#c07ce0; }
 .results.list-mode .badges,
@@ -942,4 +945,31 @@ body.splitting, body.splitting *{
 .results.list-mode .card .emoji-face{
   width:34px; height:34px; aspect-ratio:auto;
   font-size:22px; flex:0 0 auto;
+}
+
+/* ---------- 내 파일: 폴더 펼치기 ---------- */
+/* 폴더를 누르면 그 자리에서 아래로 펼쳐진다 (프로젝트 패널처럼) */
+.card.tree-folder{ position:relative; }
+
+.tree-arrow{
+  position:absolute; left:5px; top:5px; z-index:3;
+  width:17px; height:17px; line-height:17px; text-align:center;
+  font-size:10px; color:var(--text-dim);
+  background:#000a; border-radius:4px;
+  pointer-events:none;
+}
+.card.tree-folder.open .tree-arrow{ color:var(--accent); }
+
+/* 목록 보기에서 깊이만큼 들여쓴다 */
+.results.list-mode .card{
+  padding-left:calc(10px + var(--depth, 0) * 18px);
+}
+.results.list-mode .tree-arrow{
+  left:calc(var(--depth, 0) * 18px + 2px);
+  top:50%; transform:translateY(-50%);
+  background:none;
+}
+/* 펼쳐진 폴더 아래는 살짝 들여쓴 느낌을 준다 */
+.results.list-mode .card.tree-folder.open{
+  background:#242321;
 }

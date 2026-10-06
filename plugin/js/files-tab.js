@@ -87,6 +87,10 @@
     this.sort = 'name';
     this.query = '';
     this.deep = false;
+    // 체크하면 이전 방식: 폴더를 두 번 누르면 그 폴더 안으로 들어간다
+    this.folderOpen = localStorage.getItem('eddieDrop.files.folderOpen') === '1';
+    this.expanded = {};        // 펼쳐 놓은 폴더 (경로 → true)
+    this.childCache = {};      // 폴더별 직속 목록 (한 번 읽으면 기억)
     this.timer = null;
     this.entries = [];
   }
@@ -167,6 +171,21 @@
     deepLab.appendChild(deepCb);
     deepLab.appendChild(el('span', null, '하위 폴더까지'));
     checks.appendChild(deepLab);
+
+    var openLab = el('label', 'check mini');
+    openLab.title = '체크하면 폴더를 두 번 눌렀을 때 그 폴더 안으로 들어갑니다 (이전 방식).\n체크를 풀면 그 자리에서 펼쳐집니다.';
+    var openCb = el('input');
+    openCb.type = 'checkbox';
+    openCb.checked = this.folderOpen;
+    openCb.addEventListener('change', function () {
+      self.folderOpen = openCb.checked;
+      localStorage.setItem('eddieDrop.files.folderOpen', self.folderOpen ? '1' : '0');
+      self.expanded = {};
+      self.render();
+    });
+    openLab.appendChild(openCb);
+    openLab.appendChild(el('span', null, '폴더 열어서 보기'));
+    checks.appendChild(openLab);
     bar.appendChild(checks);
 
     bar.appendChild(el('p', 'hint howto',
@@ -221,7 +240,12 @@
         });
       },
       onActivate: function (item) {
-        if (item.isDir) { self.enter(item.fullPath); return; }
+        // 폴더는 그 자리에서 펼쳤다 접는다 (프로젝트 패널처럼)
+        if (item.isDir) {
+          if (self.folderOpen) self.enter(item.fullPath);       // 이전 방식: 폴더 안으로
+          else self.toggleFolder(item.fullPath);                // 그 자리에서 펼치기
+          return;
+        }
         stopAudio();
         self.place(item, 'none');
       },
@@ -261,6 +285,7 @@
   };
 
   FilesTab.prototype.enter = function (dir) {
+    this.expanded = {};          // 다른 폴더로 옮기면 펼친 것은 접는다
     dir = Eddie.ui.decodePath(dir);
     this.dir = dir;
     Eddie.settings.set('myFolder', dir);
@@ -409,37 +434,129 @@
   };
 
   // ---------------- 그리기 ----------------
+  /**
+   * 폴더 하나의 바로 아래 항목만 읽는다 (하위 폴더 속까지는 안 들어간다).
+   * 한 번 읽으면 기억해 두고 다시 읽지 않는다.
+   */
+  FilesTab.prototype.readOne = function (dir) {
+    if (this.childCache[dir]) return this.childCache[dir];
+
+    var out = [];
+    var names;
+    try { names = fs.readdirSync(dir); }
+    catch (e) { this.childCache[dir] = out; return out; }
+
+    for (var i = 0; i < names.length; i++) {
+      var name = names[i];
+      if (name.charAt(0) === '.') continue;
+
+      var full = path.join(dir, name);
+      var st;
+      try { st = fs.statSync(full); } catch (e) { continue; }
+
+      // 맥은 파일 이름을 쪼개서(NFD) 돌려준다 → 합쳐진 형태로 맞춘다
+      var shown = Eddie.ui.prettyName(name);
+
+      if (st.isDirectory()) {
+        out.push({ isDir: true, name: shown, fullPath: full, mtime: st.mtimeMs, size: 0 });
+        continue;
+      }
+      var k = kindOfFile(name);
+      if (!k) continue;
+      out.push({ isDir: false, name: shown, fullPath: full, kind: k,
+                 size: st.size, mtime: st.mtimeMs });
+    }
+
+    this.childCache[dir] = out;
+    return out;
+  };
+
+  /**
+   * 화면에 보일 목록을 만든다.
+   *
+   * 펼쳐 놓은 폴더는 바로 아래에 그 폴더의 내용을 끼워 넣는다.
+   * 프로젝트 패널에서 폴더를 펼치는 것과 같은 모습.
+   */
+  FilesTab.prototype.visibleTree = function () {
+    var self = this;
+    var out = [];
+
+    function add(dir, depth) {
+      var kids = self.readOne(dir).slice();
+      kids.sort(function (a, b) { return self.compare(a, b); });
+
+      for (var i = 0; i < kids.length; i++) {
+        var e = kids[i];
+        var row = {};
+        for (var k in e) if (e.hasOwnProperty(k)) row[k] = e[k];
+        row.depth = depth;
+        row.open = !!self.expanded[e.fullPath];
+        // 안에 쓸 수 있는 파일이 하나도 없으면 화살표를 숨긴다
+        if (e.isDir) row.empty = self.readOne(e.fullPath).length === 0;
+        out.push(row);
+
+        if (e.isDir && row.open) add(e.fullPath, depth + 1);
+      }
+    }
+
+    add(this.dir, 0);
+    return out;
+  };
+
+  /** 폴더를 펼치거나 접는다 */
+  FilesTab.prototype.toggleFolder = function (dir) {
+    if (this.expanded[dir]) delete this.expanded[dir];
+    else this.expanded[dir] = true;
+    this.render();
+  };
+
+  /** 정렬 기준 (트리와 검색 결과가 같은 규칙을 쓴다) */
+  FilesTab.prototype.compare = function (a, b) {
+    if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;     // 폴더가 먼저
+    function byName(x, y) { return x.name.localeCompare(y.name, 'ko'); }
+    switch (this.sort) {
+      case 'name-desc': return byName(b, a);
+      case 'kind': {
+        var ka = KIND_ORDER[a.kind] || 9, kb = KIND_ORDER[b.kind] || 9;
+        if (ka !== kb) return ka - kb;
+        return byName(a, b);
+      }
+      case 'size':     return b.size - a.size;
+      case 'size-asc': return a.size - b.size;
+      case 'newest':   return b.mtime - a.mtime;
+      case 'oldest':   return a.mtime - b.mtime;
+      default:         return byName(a, b);
+    }
+  };
+
   FilesTab.prototype.render = function () {
     var self = this;
-      // 검색어도 같은 형태로 맞춘다 (붙여넣기로 자소분리된 글이 올 수 있다)
-      var q = Eddie.ui.prettyName(this.query).toLowerCase();
+    // 검색어도 같은 형태로 맞춘다 (붙여넣기로 자소분리된 글이 올 수 있다)
+    var q = Eddie.ui.prettyName(this.query).toLowerCase();
 
-    var list = this.entries.filter(function (e) {
-      if (e.isDir) return !q;                              // 검색 중에는 폴더를 숨긴다
-      if (self.kind && e.kind !== self.kind) return false;
-      if (q && e.name.toLowerCase().indexOf(q) < 0) return false;
-      return true;
-    });
-
-    function byName(a, b) { return a.name.localeCompare(b.name, 'ko'); }
-
-    list.sort(function (a, b) {
-      if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;     // 폴더는 항상 먼저
-
-      switch (self.sort) {
-        case 'name-desc': return byName(b, a);
-        case 'kind': {
-          var ka = KIND_ORDER[a.kind] || 9, kb = KIND_ORDER[b.kind] || 9;
-          if (ka !== kb) return ka - kb;
-          return byName(a, b);                              // 같은 종류면 이름순
-        }
-        case 'size':     return b.size - a.size;
-        case 'size-asc': return a.size - b.size;
-        case 'newest':   return b.mtime - a.mtime;
-        case 'oldest':   return a.mtime - b.mtime;
-        default:         return byName(a, b);
-      }
-    });
+    var list;
+    if (q) {
+      // 찾는 중에는 트리를 접어두고, 조건에 맞는 파일만 쭉 보여준다
+      list = this.entries.filter(function (e) {
+        if (e.isDir) return false;
+        if (self.kind && e.kind !== self.kind) return false;
+        return e.name.toLowerCase().indexOf(q) >= 0;
+      });
+      list.sort(function (a, b2) { return self.compare(a, b2); });
+    } else if (this.folderOpen) {
+      // 이전 방식: 지금 들어와 있는 폴더의 내용만 평평하게
+      list = this.entries.filter(function (e) {
+        if (e.isDir) return true;
+        return !self.kind || e.kind === self.kind;
+      });
+      list.sort(function (a, b2) { return self.compare(a, b2); });
+    } else {
+      // 평소에는 펼쳐 놓은 폴더를 따라 목록을 만든다
+      list = this.visibleTree().filter(function (e) {
+        if (e.isDir) return true;                      // 폴더는 늘 보인다
+        return !self.kind || e.kind === self.kind;
+      });
+    }
 
     this.grid.clear();
     this.grid.defineGroup('files', { name: '내 파일' });
@@ -472,12 +589,19 @@
       ext: ext(e.name)
     };
 
+    base.depth = e.depth || 0;                 // 들여쓴 깊이
+
     if (e.isDir) {
       base.type = 'folder';
+      base.open = !!e.open;
+      base.empty = !!e.empty;
+      // '폴더 열어서 보기' 일 때는 펼치는 화살표가 필요 없다
+      base.tree = !this.folderOpen && !e.empty;
       base.tile = 'sq';
       base.thumb = '';
       base.overlayName = Eddie.ui.prettyName(e.name);   // 타일 위에 폴더 이름
-      base.sub = '폴더';
+      base.sub = this.folderOpen ? '폴더'
+               : (e.empty ? '폴더 · 빈 폴더' : (e.open ? '폴더 · 펼침' : '폴더'));
       return base;
     }
 
