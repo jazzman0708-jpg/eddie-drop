@@ -507,7 +507,22 @@
   FilesTab.prototype.toggleFolder = function (dir) {
     if (this.expanded[dir]) delete this.expanded[dir];
     else this.expanded[dir] = true;
+
+    // 목록을 통째로 다시 그리면 화면이 맨 위로 튄다.
+    // 보고 있던 자리를 그대로 두려고 스크롤 위치를 기억했다가 되돌린다.
+    var box = this.grid.root;
+    var keep = box ? box.scrollTop : 0;
+
     this.render();
+
+    if (box) box.scrollTop = keep;
+
+    // 방금 누른 폴더를 계속 고른 상태로 둔다.
+    // (스크롤을 되돌린 뒤라 그 카드는 이미 화면 안에 있어 더 움직이지 않는다)
+    for (var i = 0; i < this.grid.flat.length; i++) {
+      var it = this.grid.flat[i].__item;
+      if (it && it.fullPath === dir) { this.grid.select(i); break; }
+    }
   };
 
   /** 정렬 기준 (트리와 검색 결과가 같은 규칙을 쓴다) */
