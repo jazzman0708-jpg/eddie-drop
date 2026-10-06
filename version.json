@@ -1,9 +1,9 @@
 {
-  "version": "1.1.1",
+  "version": "1.1.2",
   "date": "2026-10-06",
-  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.1.1/eddie-drop-plugin-1.1.1.zip",
-  "sha256": "1fcb06e7182647b3f93b1f95e6b915eb3d0865c2a9cbcbde050333e77e508a3d",
-  "notes": "내 파일 탭에서 폴더가 프리미어 프로젝트 패널처럼 그 자리에서 펼쳐집니다. 예전처럼 폴더 안으로 들어가고 싶으면 '폴더 열어서 보기' 를 체크하세요.",
+  "url": "https://github.com/jazzman0708-jpg/eddie-drop/releases/download/v1.1.2/eddie-drop-plugin-1.1.2.zip",
+  "sha256": "3c487b2580f39a7dae79547101660fb7a034772cab5d4dc0f88d3fbebeacad4b",
+  "notes": "내 파일 탭에서 폴더를 펼칠 때 화면이 맨 위로 튀던 문제를 고쳤습니다.",
   "eddie-pad": {
     "version": "1.0.0",
     "date": "2026-09-29",
