@@ -13,6 +13,11 @@ jobs:
   # ------------------------------------------------------------------
   mac:
     runs-on: macos-latest
+
+    # 태그로 돌 때 만든 파일을 릴리스에 붙이려면 쓰기 권한이 필요하다
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
 
@@ -56,3 +61,11 @@ jobs:
         with:
           name: EddieDrop-mac
           path: dist/*.pkg
+
+      # 태그로 돌린 경우에는 릴리스에도 붙인다
+      - name: 릴리스에 붙이기
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${GITHUB_REF_NAME}" dist/*.pkg --clobber
