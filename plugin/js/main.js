@@ -606,7 +606,8 @@
     head.appendChild(el('span', 'title',
       def.label + ' <span style="color:var(--text-faint);font-weight:400">· ' + (def.desc || '') + '</span>'));
     if (def.issueUrl) {
-      var a = ui.link('키 발급받기 ↗', def.issueUrl);
+      // 발급이 막힌 소스는 '발급받기' 라고 하면 헛걸음이 된다
+      var a = ui.link(def.note ? def.label + ' 안내 ↗' : '키 발급받기 ↗', def.issueUrl);
       a.className = 'issue';
       head.appendChild(a);
     }

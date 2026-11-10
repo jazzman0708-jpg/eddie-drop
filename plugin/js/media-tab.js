@@ -478,9 +478,12 @@
       var names = missing.map(function (id) { return SS.adapters[id].name; }).join(' · ');
       var msg = '설정 탭에서 ' + names + ' API 키를 넣어주세요.';
       // Pexels 는 새 키를 받을 수 없으니, 그냥 넣으라고만 하면 막다른 길이 된다
-      if (missing.indexOf('pexels') >= 0 && missing.indexOf('pixabay') < 0) {
+      if (missing.indexOf('pexels') >= 0) {
         msg += '<br><span class="dim">Pexels 는 2026년 10월부터 새 키 발급이 멈췄습니다. ' +
-               '키가 없으면 위에서 <b>Pixabay</b> 를 고르세요.</span>';
+               (missing.indexOf('pixabay') >= 0
+                 ? '<b>Pixabay</b> 키를 받아서 넣으시면 영상과 이미지를 쓸 수 있어요.'
+                 : '키가 없으면 위에서 <b>Pixabay</b> 를 고르세요.') +
+               '</span>';
       }
       this.grid.message(msg, 'need-key');
       return;
