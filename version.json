@@ -5,16 +5,23 @@
   "sha256": "3c487b2580f39a7dae79547101660fb7a034772cab5d4dc0f88d3fbebeacad4b",
   "notes": "내 파일 탭에서 폴더를 펼칠 때 화면이 맨 위로 튀던 문제를 고쳤습니다.",
   "eddie-pad": {
-    "version": "1.0.0",
-    "date": "2026-09-29",
+    "version": "1.2.1",
+    "date": "2026-11-10",
     "url": "",
-    "notes": "",
+    "notes": "빠른 검색창에서 오디오 효과도 찾아 넣어요 · 효과 영어 이름을 한글 발음으로 쳐도 찾아요 (트랜스폼 → 변형)",
     "noticeUrl": "",
     "reportUrl": "https://docs.google.com/forms/d/e/1FAIpQLSdBynPaKJy1icWnrhNjqZATLX-18yMQTPq97zCUuw2JS2UQMA/viewform?usp=pp_url&entry.313801160=PADVER&entry.481104678=PPROVER&entry.684466220=PPROLANG&entry.803555383=LASTPRESET&entry.1711306640=OSINFO",
-    "freeSlots": 5,
-    "upgradeText": "에디 프리셋 구매자는 베타 기간 동안 무제한으로 쓸 수 있어요.",
     "upgradeUrl": "https://www.youtubeeddie.co.kr/channels/L2NoYW5uZWxzLzE1NzQ2",
     "profileUrl": "https://www.youtubeeddie.co.kr/channels/L2NoYW5uZWxzLzE1NzQ2/settings",
-    "regUrl": "https://eddie-pad.eddiepadad.workers.dev"
+    "regUrl": "https://eddie-pad.eddiepadad.workers.dev",
+    "mac": {
+      "zxp": "https://eddie-pad.eddiepadad.workers.dev/updates/EddiePad-1.2.1-mac.zxp",
+      "sha256": "ed147100620ee9af37e1d1aa3a0ad80e745667cbf7ef449c58f10da586dea7a0"
+    },
+    "win": {
+      "zxp": "https://eddie-pad.eddiepadad.workers.dev/updates/EddiePad-1.2.1-win.zxp",
+      "sha256": "18c1d86abefcb11c37b6ea5453ca09bfb4ff18d5f7bda1f48b8afd200135e0a1"
+    },
+    "requiresInstaller": false
   }
 }
