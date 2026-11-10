@@ -973,3 +973,12 @@ body.splitting, body.splitting *{
 .results.list-mode .card.tree-folder.open{
   background:#242321;
 }
+
+/* 설정 탭 키 카드의 소스별 알림 (예: Pexels 새 키 발급 중단) */
+.keycard .hint.keynote{
+  margin:6px 0 10px;
+  padding:8px 10px;
+  border-left:2px solid var(--accent);
+  background:#2a2825;
+  line-height:1.6;
+}

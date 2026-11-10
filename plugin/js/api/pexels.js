@@ -228,6 +228,9 @@
       label: 'Pexels',
       desc: '영상 · 이미지',
       issueUrl: 'https://www.pexels.com/api/',
+      note: 'Pexels 는 2026년 10월부터 <b>새 키 발급을 멈췄습니다</b>. ' +
+            '전에 받아둔 키가 있으면 그대로 쓸 수 있고, 없다면 아래 <b>Pixabay</b> 키를 받아서 쓰세요. ' +
+            '영상 · 이미지 탭에서 <b>Pixabay</b> 를 고르면 됩니다.',
       test: function (key) {
         return Eddie.net.getJson('https://api.pexels.com/v1/search?query=sea&per_page=1',
                                  { headers: { Authorization: key } })

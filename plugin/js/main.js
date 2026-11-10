@@ -612,6 +612,9 @@
     }
     card.appendChild(head);
 
+    // 그 소스에만 해당하는 알림 (예: Pexels 새 키 발급 중단)
+    if (def.note) card.appendChild(el('p', 'hint keynote', def.note));
+
     var row = el('div', 'row');
     var input = el('input', 'grow');
     input.type = 'password';

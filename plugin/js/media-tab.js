@@ -122,7 +122,9 @@
       category: '', imageType: '', videoType: '', order: '',
       editorsChoice: false, safesearch: true
     };
-    this.mode = localStorage.getItem('eddieDrop.ss.mode.' + kind) || 'pexels';
+    // Pexels 는 2026-10 부터 새 API 키 발급이 멈춰서, 처음 쓰는 사람은 키를 받을 수 없다.
+    // 그래서 기본 소스는 Pixabay 로 둔다 (이미 Pexels 를 고른 사람은 그대로).
+    this.mode = localStorage.getItem('eddieDrop.ss.mode.' + kind) || 'pixabay';
     this.state = {};
     this.recentKey = 'eddieDrop.ss.recent.' + kind;
   }
@@ -474,7 +476,13 @@
     var missing = srcs.filter(function (id) { return !Eddie.settings.key(id); });
     if (missing.length === srcs.length) {
       var names = missing.map(function (id) { return SS.adapters[id].name; }).join(' · ');
-      this.grid.message('설정 탭에서 ' + names + ' API 키를 넣어주세요.', 'need-key');
+      var msg = '설정 탭에서 ' + names + ' API 키를 넣어주세요.';
+      // Pexels 는 새 키를 받을 수 없으니, 그냥 넣으라고만 하면 막다른 길이 된다
+      if (missing.indexOf('pexels') >= 0 && missing.indexOf('pixabay') < 0) {
+        msg += '<br><span class="dim">Pexels 는 2026년 10월부터 새 키 발급이 멈췄습니다. ' +
+               '키가 없으면 위에서 <b>Pixabay</b> 를 고르세요.</span>';
+      }
+      this.grid.message(msg, 'need-key');
       return;
     }
 
