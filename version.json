@@ -5,22 +5,22 @@
   "sha256": "0d7dc1e2b3fb8dee45023fb6d1fe698408daa3a928743c78c780e65f2f896f8c",
   "notes": "Pexels 가 새 API 키 발급을 멈춰서, 영상·이미지 탭이 처음에 Pixabay 로 열리도록 바꿨습니다. 전에 받아둔 Pexels 키는 그대로 쓸 수 있습니다.",
   "eddie-pad": {
-    "version": "1.2.2",
-    "date": "2026-11-13",
+    "version": "1.2.3",
+    "date": "2026-11-17",
     "url": "",
-    "notes": "같은 버튼을 한 번 더 눌러 해제할 때 윈도우에서 중간에 멈추던 문제를 고쳤어요. 이제 프리미어 안에서 바로 되돌려요.",
+    "notes": "새 컴퓨터에서 쓰던 컴퓨터를 골라 바로 바꿔 등록할 수 있어요 · 빠른 검색창에서 오타가 있어도 비슷한 효과를 찾아요",
     "noticeUrl": "",
     "reportUrl": "https://docs.google.com/forms/d/e/1FAIpQLSdBynPaKJy1icWnrhNjqZATLX-18yMQTPq97zCUuw2JS2UQMA/viewform?usp=pp_url&entry.313801160=PADVER&entry.481104678=PPROVER&entry.684466220=PPROLANG&entry.803555383=LASTPRESET&entry.1711306640=OSINFO",
     "upgradeUrl": "https://www.youtubeeddie.co.kr/channels/L2NoYW5uZWxzLzE1NzQ2",
     "profileUrl": "https://www.youtubeeddie.co.kr/channels/L2NoYW5uZWxzLzE1NzQ2/settings",
     "regUrl": "https://eddie-pad.eddiepadad.workers.dev",
     "mac": {
-      "zxp": "https://eddie-pad.eddiepadad.workers.dev/updates/EddiePad-1.2.2-mac.zxp",
-      "sha256": "2b76b11efdce1ac111a9726bc3b395026c8f5e675f30ec80fea1ffe62d033b2d"
+      "zxp": "https://eddie-pad.eddiepadad.workers.dev/updates/EddiePad-1.2.3-mac.zxp",
+      "sha256": "880597bd4b67d9ecd74cc854251672dd026dbf5a3c06bc6cbc6c5e68f9a875f7"
     },
     "win": {
-      "zxp": "https://eddie-pad.eddiepadad.workers.dev/updates/EddiePad-1.2.2-win.zxp",
-      "sha256": "838f8572c806b57eb299cb026cbd474c2cb42fd1f6c741e466c42af01e278eeb"
+      "zxp": "https://eddie-pad.eddiepadad.workers.dev/updates/EddiePad-1.2.3-win.zxp",
+      "sha256": "99c33d2d3d9809f3513ab2b39942778af77b648eb2f5d3098a320a216a29d3fa"
     },
     "requiresInstaller": false
   }
